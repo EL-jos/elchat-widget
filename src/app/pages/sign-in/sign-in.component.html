@@ -1,0 +1,38 @@
+<div class="el-screen el-sign-up">
+    <button type="button" class="el-btn-back">
+        <img src="../../../assets/svg/arrow-left-1-svgrepo-com.svg" alt="">
+    </button>
+    <h1>Sign In</h1>
+    <legend>Lorem ipsum dolor sit amet consectetur adipisicing elit. Error saepe eius tempore?</legend>
+    <button class="el-sin-up-with">
+        <img src="../../../assets/svg/google-icon.svg" alt="">
+        <span>Sign In with Google</span>
+    </button>
+    <button class="el-sin-up-with">
+        <img src="../../../assets/svg/facebook-icon.svg" alt="">
+        <span>Sign In with Facebook</span>
+    </button>
+    <div class="el-container-divider">
+        <div class="el-line"></div>
+        <span>or</span>
+        <div class="el-line"></div>
+    </div>
+    <form #signInFormGroup="ngForm" (ngSubmit)="onSubmit(signInFormGroup)" class="el-form">
+        <div class="el-form-group">
+            <input type="email" id="email" required name="email" [ngModel]>
+            <label for="email">Email Address</label>
+        </div>
+        <div class="el-form-group">
+            <input type="password" id="password" required name="password" [ngModel]>
+            <label for="password">Password</label>
+            <button type="button" class="el-btn-show-password">
+                <img src="../../../assets/svg/eye-svgrepo-com.svg" alt="">
+            </button>
+            <button type="button" class="el-btn-mask-password el-hidden">
+                <img src="../../../assets/svg/eye-off-svgrepo-com.svg" alt="">
+            </button>
+        </div>
+        <button type="submit" class="el-btn-primary el-btn-block">Sign In</button>
+    </form>
+    <p class="el-text-footer">Don't have an account yet? <a routerLink="/sign-up">Sign Up</a></p>
+</div>

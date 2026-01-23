@@ -1,0 +1,517 @@
+
+
+:root {
+    --primary-color: #ed6f01;
+    --secondary-color: #ff9100;
+    --triad-color: #f8f6f4;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-size: 16px;
+}
+
+body {
+    font-family: var(--font-family);
+    display: grid;
+    place-items: center;
+    width: 100vw;
+    min-height: 100vh;
+}
+
+.el-hidden {
+    display: none !important;
+}
+
+#el-main-component {
+    background-color: var(--triad-color);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .3);
+    overflow: hidden;
+    width: 350px;
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+}
+
+#el-main-component .el-sign-up,
+#el-main-component .el-verification,
+#el-main-component .el-bot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+#el-main-component .el-sign-up .el-btn-back,
+#el-main-component .el-verification .el-btn-back,
+#el-main-component .el-bot .el-btn-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    font-size: calc(var(--font-size) * .8);
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+#el-main-component .el-sign-up .el-btn-back:hover,
+#el-main-component .el-verification .el-btn-back:hover,
+#el-main-component .el-bot .el-btn-back:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+}
+
+#el-main-component .el-sign-up .el-btn-back img,
+#el-main-component .el-verification .el-btn-back img,
+#el-main-component .el-bot .el-btn-back img {
+    width: 20px;
+    height: 20px;
+}
+
+.el-screen h1 {
+    color: #333;
+    font-size: calc(var(--font-size) * 1.5);
+    width: fit-content;
+    text-align: center;
+}
+
+.el-screen legend {
+    color: rgba(51, 51, 51, .5);
+    font-size: calc(var(--font-size) * .8);
+    width: fit-content;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.el-screen .el-sin-up-with {
+    outline: none;
+    border: none;
+    background-color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.el-screen .el-sin-up-with img {
+    width: 25px;
+    height: 25px;
+}
+
+.el-screen .el-sin-up-with span {
+    font-size: calc(var(--font-size) * .8);
+    color: #333;
+    font-weight: 600;
+}
+
+.el-screen .el-sin-up-with:hover {
+    cursor: pointer;
+    box-shadow: 0 8px 10px rgba(0, 0, 0, .15);
+}
+
+.el-screen .el-container-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.el-screen .el-container-divider .el-line {
+    height: 1px;
+    background-color: rgba(0, 0, 0, .1);
+    flex-grow: 1;
+}
+
+.el-screen .el-container-divider span {
+    font-size: calc(var(--font-size) * .8);
+    color: rgba(51, 51, 51, .5);
+    font-weight: 600;
+}
+
+.el-screen.el-sign-up form,
+.el-screen.el-verification form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.el-screen.el-sign-up .el-form-group,
+.el-screen.el-verification .el-form-group {
+    width: 100%;
+    height: 40px;
+    background-color: #fff;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    font-size: calc(var(--font-size) * .9);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.el-screen.el-sign-up label,
+.el-screen.el-verification label {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    color: rgba(0, 0, 0, .3);
+    font-weight: 600;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.el-screen form input {
+    outline: none;
+    border: none;
+    box-shadow: none;
+    padding: 0.5rem 1rem;
+    font-size: calc(var(--font-size) * .9);
+    transition: all 0.3s ease;
+    width: 100%;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    position: relative;
+    font-weight: 600;
+}
+
+.el-screen form button,
+#el-modal .el-modal-content .el-btn {
+    outline: none;
+    border: none;
+    background-color: #000;
+    color: #fff;
+    padding: .7rem 1rem;
+    border-radius: 2rem;
+    font-size: calc(var(--font-size) * .8);
+    font-weight: 600;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+}
+
+.el-screen form button:hover {
+    cursor: pointer;
+    box-shadow: 0 8px 10px rgba(0, 0, 0, .15);
+}
+
+.el-screen .el-form-group input:focus+label,
+.el-screen .el-form-group input:valid+label {
+    top: .5rem;
+    left: 0.3rem;
+    transform: translateY(-50%) scale(.7);
+}
+
+.el-screen .el-text-footer {
+    font-size: calc(var(--font-size) * .8);
+    color: rgba(51, 51, 51, .5);
+    text-align: center;
+    width: fit-content;
+    margin-top: 1rem;
+    font-weight: 600;
+}
+
+.el-screen .el-text-footer a {
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: lowercase;
+}
+
+.el-screen .el-text-footer a:hover {
+    text-decoration: underline;
+}
+
+.el-screen .el-form-group button {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    background-color: transparent;
+    padding: 0;
+    box-shadow: none;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    transition: all 0.3s ease;
+}
+
+.el-screen .el-form-group button:hover {
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.el-screen .el-form-group img {
+    width: 15px;
+    height: 15px;
+}
+
+.el-screen .el-container-digits {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    justify-content: center;
+}
+
+.el-screen .el-container-digits input {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-size: calc(var(--font-size) * 1.2);
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+}
+
+.el-screen .el-container-digits input:focus {
+    background-color: #e6e4e3;
+}
+
+.el-screen .el-info {
+    font-size: calc(var(--font-size) * .8);
+    color: rgba(51, 51, 51, .5);
+    text-align: center;
+    width: fit-content;
+    margin: 1rem 0;
+    font-weight: 600;
+    width: fit-content;
+
+}
+
+.el-screen .el-info a {
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: lowercase;
+}
+
+.el-screen .el-info a:hover {
+    text-decoration: underline;
+}
+
+.el-screen .el-info span {
+    margin-left: .5rem;
+}
+
+.el-verification form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    width: 100%;
+}
+#el-modal{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    place-items: center;
+    z-index: 1000;
+    display: none;
+}
+#el-modal.el-active {
+    display: grid;
+}
+
+#el-modal .el-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /*background-color: rgba(187, 225, 228, .1);*/
+    /*background-color: rgba(0, 0, 0, .5);*/
+    background-color: rgba(128, 106, 90, .8);
+    backdrop-filter: blur(2px);
+}
+
+#el-modal .el-modal-content {
+    position: relative;
+    background-color: #fff;
+    padding: 3rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .3);
+    width: 300px;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+#el-modal .el-modal-content h2 {
+    color: #333;
+    font-size: calc(var(--font-size) * 1.2);
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+#el-modal .el-modal-content p {
+    font-size: calc(var(--font-size) * .9);
+    color: rgba(51, 51, 51, .7);
+    text-align: center;
+    margin: 0;
+}
+
+#el-modal .el-modal-content .el-icon {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+#el-modal .el-modal-content .el-icon img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    top: 0;
+    left: 0;
+}
+
+#el-main-component .el-bot {
+    height: calc(100dvh - 4rem);
+}
+
+#el-main-component .el-bot .el-chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+    padding-right: .5rem;
+    margin-top: 4rem;
+    height: calc(100% - 4rem);
+    padding-top: 1rem;
+}
+
+.el-message-user {
+    align-self: flex-end;
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.el-message-bot {
+    align-self: flex-start;
+    background-color: var(--secondary-color);
+    color: #000;
+}
+
+.el-message {
+    font-size: calc(var(--font-size) * .9);
+    line-height: 1.4;
+    padding: .5rem 1rem;
+    border-radius: 1rem;
+    max-width: 90%;
+    word-wrap: break-word;
+    box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+}
+
+.el-loading-message-bot {
+    align-self: flex-start;
+    background-color: var(--secondary-color);
+    color: #000;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.el-loading-message-bot img {
+    width: 40px;
+    height: 40px;
+}
+
+.el-loading-message-bot p {
+    margin: 0;
+    font-size: calc(var(--font-size) * .7);
+    font-weight: 600;
+    color: #000;
+    animation: el-blink 1s infinite;
+}
+
+@keyframes el-blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+form.el-chat-input-area {
+    display: flex;
+    width: 100%;
+    height: 200px;
+    position: relative;
+}
+
+form.el-chat-input-area .el-chat-input {
+    display: block;
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(0, 0, 0, .1);
+    font-size: calc(var(--font-size) * .9);
+    outline: none;
+    transition: all 0.3s ease;
+    background-color: #fff;
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border-radius: 15px;
+}
+
+form.el-chat-input-area .el-chat-input:focus {
+    border-color: var(--primary-color);
+}
+
+form.el-chat-input-area .el-btn-send-message {
+    position: absolute;
+    right: 10px;
+    bottom: -10px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+form.el-chat-input-area .el-btn-send-message img {
+    width: 20px;
+    height: 20px;
+    filter: invert(1);
+}

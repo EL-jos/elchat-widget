@@ -1,0 +1,28 @@
+<div class="el-screen el-bot">
+    <button type="button" class="el-btn-back">
+        <img src="../../../assets/svg/arrow-left-1-svgrepo-com.svg" alt="">
+    </button>
+    <div class="el-chat-messages">
+        <ng-container *ngFor="let msg of selectedConversation?.messages">
+            <div *ngIf="msg.content && msg.id" [ngClass]="{
+                 'el-message-bot': msg.role==='bot',
+                 'el-message-user': msg.role==='user',
+                 'el-loading-message-bot': msg.id==='loading',
+                 'el-message': true
+               }">
+                <ng-container *ngIf="msg.id==='loading'">
+                    <img src="../../../assets/svg/loading-black.svg" alt="">
+                </ng-container>
+                <p>{{ msg.content }}</p>
+            </div>
+        </ng-container>
+
+    </div>
+
+    <form class="el-chat-input-area" (ngSubmit)="onSubmit(chatForm)" #chatForm="ngForm">
+        <textarea type="text" class="el-chat-input" placeholder="Type your message here..." [(ngModel)]="messageContent" name="message"></textarea>
+        <button type="submit" class="el-btn-send-message">
+            <img src="../../../assets/svg/send-2-svgrepo-com.svg" alt="">
+        </button>
+    </form>
+</div>

@@ -1,0 +1,20 @@
+
+<div class="el-screen el-verification">
+    <button type="button" class="el-btn-back">
+        <img src="../../../assets/svg/arrow-left-1-svgrepo-com.svg" alt="">
+    </button>
+    <h1>Verification</h1>
+    <legend>Enter the 6-digit code that has been sent <strong>elongajosue22@gmail.com</strong></legend>
+    <form #verificationFormGroup="ngForm" (ngSubmit)="onSubmit(verificationFormGroup)" class="el-form">
+        <div class="el-container-digits">
+            <div class="el-form-group"><input type="text" maxlength="1" pattern="[A-Z0-9]" required [ngModel] name="code0"></div>
+            <div class="el-form-group"><input type="text" maxlength="1" pattern="[A-Z0-9]" required [ngModel] name="code1"></div>
+            <div class="el-form-group"><input type="text" maxlength="1" pattern="[A-Z0-9]" required [ngModel] name="code2"></div>
+            <div class="el-form-group"><input type="text" maxlength="1" pattern="[A-Z0-9]" required [ngModel] name="code3"></div>
+            <div class="el-form-group"><input type="text" maxlength="1" pattern="[A-Z0-9]" required [ngModel] name="code4"></div>
+            <div class="el-form-group"><input type="text" maxlength="1" pattern="[A-Z0-9]" required [ngModel] name="code5"></div>
+        </div>
+        <p class="el-info">Haven't received the code yet? <br><a href="#" (click)="resendCode()" [class.disabled]="resendDisabled">Resend</a><span *ngIf="resendDisabled">({{ resendTimer }}s)</span></p>
+        <button type="submit" class="el-btn-primary el-btn-block">Verify</button>
+    </form>
+</div>
