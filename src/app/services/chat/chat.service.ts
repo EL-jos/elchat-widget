@@ -22,9 +22,16 @@ export class ChatService {
   }
 
   /**
+   * Récupère toutes les conversations de l'utilisateur connecté
+   */
+  getUserMessages(conversationId: string, siteId: string): Observable<Conversation> {
+    return this.http.get<Conversation>(`${this.api}/conversation/${conversationId}/${siteId}`);
+  }
+
+  /**
    * Envoie un message dans une conversation
    */
-  sendMessage(conversationId: string, question: string, siteId: string): Observable<Message> {
+  sendMessage(conversationId: string | null, question: string, siteId: string): Observable<Message> {
     return this.http.post<Message>(`${this.api}/chat/ask`, { conversation_id: conversationId, question, site_id: siteId });
   }
 }

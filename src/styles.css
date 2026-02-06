@@ -1,3 +1,9 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
 
 
 :root {
@@ -12,25 +18,70 @@ body {
     font-family: var(--font-family);
     display: grid;
     place-items: center;
-    width: 100vw;
-    min-height: 100vh;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    body {
+        height: 90vh;
+    }
 }
 
 .el-hidden {
     display: none !important;
 }
 
+.el-close-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #000;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+}
+
+.el-close-btn:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+    background-color: var(--primary-color);
+}.el-close-btn img {
+    user-select: none;
+    pointer-events: none;
+}
+
 #el-main-component {
     background-color: var(--triad-color);
     padding: 1rem;
     border-radius: 0.5rem;
-    box-shadow: 0 0 10px rgba(0, 0, 0, .3);
-    overflow: hidden;
-    width: 350px;
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
+
+    height: 540px;
+    overflow-y: auto;
+    /* Firefox */
+    scrollbar-width: none;
+    /* IE / Edge */
+    -ms-overflow-style: none;
 }
+
+/* Chrome / Safari */
+body::-webkit-scrollbar,
+#el-main-component::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
 
 #el-main-component .el-sign-up,
 #el-main-component .el-verification,
@@ -45,8 +96,7 @@ body {
 }
 
 #el-main-component .el-sign-up .el-btn-back,
-#el-main-component .el-verification .el-btn-back,
-#el-main-component .el-bot .el-btn-back {
+#el-main-component .el-verification .el-btn-back {
     position: absolute;
     top: 0;
     left: 0;
@@ -75,7 +125,8 @@ body {
 
 #el-main-component .el-sign-up .el-btn-back img,
 #el-main-component .el-verification .el-btn-back img,
-#el-main-component .el-bot .el-btn-back img {
+#el-main-component .el-bot .el-btn-back img,
+#el-main-component .el-close-btn img{
     width: 20px;
     height: 20px;
 }
@@ -216,6 +267,7 @@ body {
 .el-screen form button:hover {
     cursor: pointer;
     box-shadow: 0 8px 10px rgba(0, 0, 0, .15);
+    background-color: var(--primary-color);
 }
 
 .el-screen .el-form-group input:focus+label,
@@ -326,7 +378,8 @@ body {
     align-items: center;
     width: 100%;
 }
-#el-modal{
+
+#el-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -336,6 +389,7 @@ body {
     z-index: 1000;
     display: none;
 }
+
 #el-modal.el-active {
     display: grid;
 }
@@ -400,7 +454,7 @@ body {
 }
 
 #el-main-component .el-bot {
-    height: calc(100dvh - 4rem);
+    height: 100%;
 }
 
 #el-main-component .el-bot .el-chat-messages {
@@ -409,8 +463,7 @@ body {
     gap: 1rem;
     overflow-y: auto;
     padding-right: .5rem;
-    margin-top: 4rem;
-    height: calc(100% - 4rem);
+    height: calc(100% - 200px);
     padding-top: 1rem;
 }
 
@@ -476,7 +529,12 @@ form.el-chat-input-area {
     display: flex;
     width: 100%;
     height: 200px;
-    position: relative;
+    position: absolute;
+    bottom: 0;
+}
+
+#el-main-component .el-bot .el-chat-messages+form.el-chat-input-area {
+    position: static;
 }
 
 form.el-chat-input-area .el-chat-input {
@@ -510,8 +568,142 @@ form.el-chat-input-area .el-btn-send-message {
     border-radius: 50%;
 }
 
+form.el-chat-input-area .el-btn-send-message:hover {
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+    background-color: var(--primary-color);
+}
+
 form.el-chat-input-area .el-btn-send-message img {
     width: 20px;
     height: 20px;
     filter: invert(1);
+}
+
+
+.el-welcom {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.el-welcom div img {
+    /* position: absolute; */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    top: 0;
+    left: 0;
+}
+
+.el-welcom h2 {
+    color: #333;
+    font-size: calc(var(--font-size) * 1.2);
+    text-align: center;
+}
+
+.el-welcom p {
+    font-size: calc(var(--font-size) * .9);
+    color: rgba(51, 51, 51, .7);
+    text-align: center;
+    margin-top: .25rem;
+}
+
+.el-welcom button {
+    outline: none;
+    border: none;
+    background-color: #000;
+    color: #fff;
+    padding: .7rem 1rem;
+    border-radius: 2rem;
+    font-size: calc(var(--font-size) * .8);
+    font-weight: 600;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    width: fit-content;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 1rem;
+    cursor: pointer;
+}
+
+.el-welcom button:hover {
+    box-shadow: 0 8px 10px rgba(0, 0, 0, .15);
+    background-color: var(--primary-color);
+}
+
+.el-welcom div {
+    width: 122px;
+    position: relative;
+    overflow: hidden;
+}
+
+.el-new-conversation .el-welcom {
+    position: absolute;
+    top: calc(100% - 350px);
+    left: 50%;
+    transform: translateX(-50%, -50%);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.el-header {
+    width: 100%;
+    padding-bottom: .5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, .1);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.el-header .el-btn-back {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    font-size: calc(var(--font-size) * .8);
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.el-header .el-btn-back:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+}
+
+.el-header .el-new-chat {
+    outline: none;
+    border: none;
+    background-color: #000;
+    color: #fff;
+    padding: .5rem 1rem;
+    border-radius: 2rem;
+    font-size: calc(var(--font-size) * .8);
+    font-weight: 600;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.el-header .el-new-chat:hover {
+    box-shadow: 0 8px 10px rgba(0, 0, 0, .15);
+    background-color: var(--primary-color);
+}
+
+.el-screen.el-bot.el-new-conversation {
+    width: 310px !important;
 }

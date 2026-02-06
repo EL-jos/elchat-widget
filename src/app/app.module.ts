@@ -11,8 +11,10 @@ import { NewPasswordComponent } from './pages/new-password/new-password.componen
 import { ChatComponent } from './pages/chat/chat.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
-import { ChatWindowComponent } from './pages/chat-window/chat-window.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { WelcomComponent } from './pages/welcom/welcom.component';
+import { ConversationComponent } from './pages/conversation/conversation.component';
+import { TruncatePipe } from './pipes/truncate/truncate.pipe';
 
 @NgModule({
   declarations: [
@@ -23,7 +25,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ResetPasswordComponent,
     NewPasswordComponent,
     ChatComponent,
-    ChatWindowComponent
+    WelcomComponent,
+    ConversationComponent,
+    TruncatePipe
   ],
   imports: [
     BrowserModule,

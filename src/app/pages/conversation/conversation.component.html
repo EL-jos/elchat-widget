@@ -1,0 +1,50 @@
+<div class="el-screen el-bot" *ngIf="hasConversations && !isCreatingConversation">
+    <div class="el-header">
+        <button type="button" class="el-new-chat">New chat</button>
+    </div>
+
+    <div class="el-chat-conversations">
+        <div *ngFor="let conv of conversations" class="el-conversation-item"
+            [class.active]="conv.id === selectedConversation?.id">
+            <a [routerLink]="'/chat/' + conv.id">
+                <div class="el-conversation-title">
+                    {{ conv.messages[0]?.content | truncate: 50 }}
+                </div>
+                <span>{{ conv.messages[0]?.created_at | date:'dd/MM/yyyy' }}</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+<div class="el-screen el-bot el-new-conversation" *ngIf="conversations.length === 0 && !isCreatingConversation">
+    <div class="el-welcom">
+        <div><img src="./assets/svg/logo_orange.svg" alt=""></div>
+        <h1>New conversation</h1>
+        <p>How may I help you?</p>
+    </div>
+
+    <form class="el-chat-input-area" (ngSubmit)="onSubmit(chatForm)" #chatForm="ngForm">
+
+        <textarea class="el-chat-input" placeholder="Type your message here..." [(ngModel)]="messageContent"
+            name="message">
+    </textarea>
+
+        <button type="submit" class="el-btn-send-message">
+            <img src="../../../assets/svg/send-2-svgrepo-com.svg" alt="">
+        </button>
+    </form>
+</div>
+
+<!-- 🔄 Loading IA -->
+<div class="el-screen el-bot el-new-conversation" *ngIf="isCreatingConversation">
+
+    <div class="el-welcom">
+        <div>
+            <img src="../../../assets/images/loading.gif" alt="">
+        </div>
+        <h1>Analysing your request…</h1>
+        <p>The AI is preparing your conversation</p>
+    </div>
+
+</div>

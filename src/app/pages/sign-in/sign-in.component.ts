@@ -24,7 +24,7 @@ export class SignInComponent implements OnInit {
       
       this.authService.login(playload).subscribe({
         next: () => {
-          this.router.navigate(['/chat']);
+          this.router.navigate(['/conversations']);
         },
         error: (err) => {
           if (err.status === 403 && err.error?.error === 'account_not_verified') {

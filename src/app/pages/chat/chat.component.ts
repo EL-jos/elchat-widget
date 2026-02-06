@@ -1,10 +1,12 @@
 import { NgFor } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Conversation } from 'src/app/models/conversation/conversation';
 import { Message } from 'src/app/models/message/message';
 import { ChatService } from 'src/app/services/chat/chat.service';
 import { MercureService } from 'src/app/services/mercure/mercure.service';
+import { WidgetService } from 'src/app/services/widget/widget.service';
 
 @Component({
   selector: 'app-chat',
@@ -13,36 +15,59 @@ import { MercureService } from 'src/app/services/mercure/mercure.service';
 })
 export class ChatComponent implements OnInit, OnDestroy {
 
+  isChatStarted = false;
+  private firstBotMessageHandled = false;
+
   conversations: Conversation[] = [];
+  conversationId: string = "";
   error?: string;
   private mercureSub?: any;
 
   selectedConversation?: Conversation;
   // 🔹 modèle pour le textarea
   messageContent: string = '';
-  siteId: string = 'f453c3df-7691-4165-9398-b366d6ddb9db'; // 🔹 Remplace par le site actif ou récupère-le via route/service
+  siteId: string = '';  //'f453c3df-7691-4165-9398-b366d6ddb9db'; // 🔹 Remplace par le site actif ou récupère-le via route/service
+  hasConversations: boolean = false; // 🔹 Pour gérer l'affichage des écrans
+  hasMessages: boolean = false; // 🔹 Pour gérer l'affichage des écrans
 
-  constructor(private chatService: ChatService, private mercure: MercureService) { }
+  constructor(private route: ActivatedRoute, private chatService: ChatService, private mercure: MercureService, private widgetService: WidgetService) { }
 
   ngOnInit(): void {
-    this.loadConversations(this.siteId);
+
+    this.conversationId = this.route.snapshot.params['conversation_id'];  
+    
+    const initialSiteId = this.widgetService.getSiteId();
+    if (initialSiteId) {
+      this.siteId = initialSiteId;
+      this.loadMessage(this.conversationId, this.siteId);
+    }
+
+    this.widgetService.siteId$.subscribe(id => {
+      if (id && id !== this.siteId) {
+        this.siteId = id;
+        if (this.siteId && this.conversationId) {
+          this.loadMessage(this.conversationId, this.siteId);
+        }
+      }
+    });
+    
   }
 
-  loadConversations(siteId: string): void {
-    this.chatService.getUserConversations(siteId).subscribe({
-      next: (convs) => {
-        convs.sort((a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+  loadMessage(conversationId: string, siteId: string) {
+    this.chatService.getUserMessages(conversationId, siteId).subscribe({
+      next: (conversation) => {
 
-        this.conversations = convs;
+        this.selectedConversation = conversation;
 
-        if (convs.length > 0) {
-          this.selectConversation(convs[0]); // 🔥 ACTIVE MERCURE
+        if (conversation.messages.length > 0) {
+          this.isChatStarted = true; // ✅ IMPORTANT
+          this.selectConversation(this.selectedConversation); // 🔥 ACTIVE MERCURE
+          this.scrollToBottom();
         }
+
       },
       error: () => {
-        this.error = 'Unable to load conversations';
+        this.error = 'Unable to load messages';
       }
     });
   }
@@ -58,63 +83,86 @@ export class ChatComponent implements OnInit, OnDestroy {
     chatForm.resetForm();
   }
 
- /*  loadConversations(siteId: string): void {
-    this.chatService.getUserConversations(siteId).subscribe({
-      next: (convs) => {
-        console.log('✅ Conversations loaded:', convs);
-
-        // 🔹 trier par date décroissante : les plus récentes en premier
-        convs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-        this.conversations = convs;
-
-        // 🔹 sélectionner la conversation la plus récente
-        if (convs.length > 0) {
-          this.selectedConversation = convs[0];
-          this.selectedConversation.messages.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-          this.scrollToBottom(); // 🔹 scroll automatique à la fin de la conversation
-          //this.selectConversation(convs[0]);
-        }
-
-      },
-      error: (err) => {
-        console.error('❌ Error loading conversations:', err);
-        this.error = 'Impossible de charger les conversations';
-      }
-    });
-  } */
-
   /**
    * Envoi d'un message utilisateur et affichage du loading pour l'IA
    */
   sendMessage(content: string): void {
-    if (!this.selectedConversation || !content.trim()) return;
+    if (!content.trim()) return;
 
-    const loadingMsg: Message = {
+    const isNewConversation = !this.selectedConversation;
+    const TEMP_ID = 'temp';
+
+    // 🔹 reset du flag bot pour nouvelle conversation
+    this.firstBotMessageHandled = false;
+
+    // 🔥 créer une conversation locale immédiatement si nouvelle
+    if (isNewConversation) {
+      this.selectedConversation = {
+        id: TEMP_ID,
+        messages: [],
+        created_at: new Date().toISOString(),
+        site_id: this.siteId
+      };
+      this.isChatStarted = true;
+    }
+
+    // ➕ ajouter le message de l'utilisateur
+    this.selectedConversation?.messages.push({
+      id: crypto.randomUUID(),
+      content,
+      role: 'user',
+      created_at: new Date().toISOString()
+    });
+
+    // ➕ ajouter le loading IA
+    this.selectedConversation?.messages.push({
       id: 'loading',
       content: 'Analysing your request...',
       role: 'bot',
       created_at: new Date().toISOString()
-    };
+    });
 
-    this.selectedConversation.messages.push(loadingMsg);
     this.scrollToBottom();
 
-    this.chatService.sendMessage(this.selectedConversation.id, content, this.siteId)
+    // ID pour le backend : null si nouvelle conversation
+    const conversationId =
+      this.selectedConversation?.id === TEMP_ID
+        ? null
+        : this.selectedConversation?.id;
+
+    this.chatService.sendMessage(conversationId as any, content, this.siteId)
       .subscribe({
-        next: (msg) => {
+        next: (res: any) => {
+
+          // 🔹 nouvelle conversation → assigner ID réel
+          if (this.selectedConversation?.id === TEMP_ID) {
+            this.selectedConversation.id = res.conversation_id;
+
+            // 🔹 abonnement Mercure maintenant possible
+            this.selectConversation(this.selectedConversation);
+
+            // ⚠️ fallback HTTP : si Mercure répond trop vite
+            if (!this.firstBotMessageHandled) {
+              this.firstBotMessageHandled = true;
+
+              this.removeLoading();
+              this.selectedConversation.messages.push({
+                id: crypto.randomUUID(),
+                content: res.answer,
+                role: 'bot',
+                created_at: new Date().toISOString()
+              });
+
+              this.scrollToBottom();
+            }
+          }
+
+          // 🔹 sinon pour conversation existante : le bot arrive via Mercure
           this.removeLoading();
-          this.selectedConversation!.messages.push(msg);
           this.scrollToBottom();
         },
         error: () => {
           this.removeLoading();
-          this.selectedConversation!.messages.push({
-            id: crypto.randomUUID(),
-            content: 'Oops, something went wrong.',
-            role: 'bot',
-            created_at: new Date().toISOString()
-          });
         }
       });
   }
@@ -123,7 +171,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.selectedConversation!.messages =
       this.selectedConversation!.messages.filter(m => m.id !== 'loading');
   }
-
 
   selectConversation(conv: Conversation) {
     this.selectedConversation = conv;
@@ -136,12 +183,26 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.mercureSub = this.mercure.subscribe<any>(topic).subscribe({
       next: (event) => {
-        console.log(event);
-        
-        // 🔥 filtrer par conversation
-        if (event.conversation_id !== conv.id) return;
 
-        this.selectedConversation!.messages.push({
+        if (!this.selectedConversation) return;
+        if (event.conversation_id !== this.selectedConversation.id) return;
+
+        // éviter doublon user
+        if (
+          event.type === 'user_message' &&
+          this.selectedConversation.messages.some(
+            m => m.role === 'user' && m.content === event.content
+          )
+        ) {
+          return;
+        }
+
+        if (event.type === 'bot_message') {
+          this.firstBotMessageHandled = true;
+          this.removeLoading();
+        }
+
+        this.selectedConversation.messages.push({
           id: crypto.randomUUID(),
           content: event.content,
           role: event.type === 'bot_message' ? 'bot' : 'user',
@@ -154,37 +215,32 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
   }
 
-
-  /* selectConversation(conv: Conversation) {
-    this.selectedConversation = conv;
-    // 🔹 Se désabonner de l'ancien topic si nécessaire
-    if (this.mercureSub) {
-      this.mercureSub.unsubscribe();
-    }
-
-    // 🔹 S'abonner au topic de la conversation sélectionnée
-    const topic = `http://localhost:8000/site/${this.siteId}/conversation/${conv.id}`;
-
-    this.mercureSub = this.mercure.subscribe<Message>(topic).subscribe({
-      next: (msg) => {
-        this.selectedConversation!.messages.push(msg);
-        this.scrollToBottom();
-      },
-      error: (err) => console.error('Mercure error:', err)
-    });
-  } */
-
   scrollToBottom() {
     setTimeout(() => {
       const chat = document.querySelector('.el-chat-messages');
       if (chat) chat.scrollTop = chat.scrollHeight;
-    }, 100);
+    }, 0);
   }
-
 
   ngOnDestroy(): void {
     // 🔹 Cleanup
     if (this.mercureSub) this.mercureSub.unsubscribe();
   }
+
+  startNewChat(): void {
+    // stop mercure sur l'ancienne conversation
+    if (this.mercureSub) {
+      this.mercureSub.unsubscribe();
+      this.mercureSub = undefined;
+    }
+
+    // reset état
+    this.selectedConversation = undefined;
+    this.conversationId = '';
+    this.messageContent = '';
+    this.isChatStarted = false;
+
+  }
+
 }
 

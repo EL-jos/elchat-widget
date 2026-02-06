@@ -74,7 +74,7 @@ export class VerificationComponent implements OnInit {
     }).subscribe({
       next: () => {
         // ✅ JWT stocké via AuthService
-        this.router.navigate(['/chat']);
+        this.router.navigate(['/conversations']);
       },
       error: () => {
         this.loading = false;
