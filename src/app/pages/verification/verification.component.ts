@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth/auth.service';
+import { WidgetService } from 'src/app/services/widget/widget.service';
 
 @Component({
   selector: 'app-verification',
@@ -9,7 +10,7 @@ import { AuthService } from 'src/app/services/auth/auth.service';
   styleUrls: ['./verification.component.css']
 })
 export class VerificationComponent implements OnInit {
-  
+
 
   email!: string;
   loading = false;
@@ -17,11 +18,13 @@ export class VerificationComponent implements OnInit {
   resendDisabled = false;
   resendTimer = 0; // en secondes
   private timerInterval?: any;
+  siteId: string = ''; 
 
   constructor(
     private route: ActivatedRoute,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private widgetService: WidgetService
   ) { }
 
   ngOnInit(): void {
@@ -30,6 +33,17 @@ export class VerificationComponent implements OnInit {
       this.router.navigate(['/sign-up']);
       return;
     }
+
+    const initialSiteId = this.widgetService.getSiteId();
+    if (initialSiteId) {
+      this.siteId = initialSiteId;
+    }
+
+    this.widgetService.siteId$.subscribe(id => {
+      if (id && id !== this.siteId) {
+        this.siteId = id;
+      }
+    });
 
     // Exemple : 1 minute par défaut si déjà envoyé
     this.startResendTimer(1);
@@ -70,7 +84,8 @@ export class VerificationComponent implements OnInit {
 
     this.authService.verifyEmail({
       email: this.email,
-      code
+      code,
+      site_id: this.siteId
     }).subscribe({
       next: () => {
         // ✅ JWT stocké via AuthService

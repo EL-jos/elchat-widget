@@ -34,7 +34,7 @@ export class AuthService {
     );
   }
 
-  verifyEmail(payload: { email: string, code: string }) {
+  verifyEmail(payload: { email: string, code: string, site_id?: string }) {
     return this.http.post<{ token: string; user: User }>(
       `${this.api}/verify-code`,
       payload
