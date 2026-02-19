@@ -1,10 +1,9 @@
-import { NgFor } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Conversation } from 'src/app/models/conversation/conversation';
-import { Message } from 'src/app/models/message/message';
 import { ChatService } from 'src/app/services/chat/chat.service';
+import { LastConversationService } from 'src/app/services/last-conversation/last-conversation.service';
 import { MercureService } from 'src/app/services/mercure/mercure.service';
 import { WidgetService } from 'src/app/services/widget/widget.service';
 
@@ -30,12 +29,18 @@ export class ChatComponent implements OnInit, OnDestroy {
   hasConversations: boolean = false; // 🔹 Pour gérer l'affichage des écrans
   hasMessages: boolean = false; // 🔹 Pour gérer l'affichage des écrans
 
-  constructor(private route: ActivatedRoute, private chatService: ChatService, private mercure: MercureService, private widgetService: WidgetService) { }
+  constructor(
+    private route: ActivatedRoute,
+    private chatService: ChatService,
+    private mercure: MercureService,
+    private widgetService: WidgetService,
+    private lastConvService: LastConversationService
+  ) { }
 
   ngOnInit(): void {
 
-    this.conversationId = this.route.snapshot.params['conversation_id'];  
-    
+    this.conversationId = this.route.snapshot.params['conversation_id'];
+
     const initialSiteId = this.widgetService.getSiteId();
     if (initialSiteId) {
       this.siteId = initialSiteId;
@@ -50,7 +55,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         }
       }
     });
-    
+
   }
 
   loadMessage(conversationId: string, siteId: string) {
@@ -165,6 +170,10 @@ export class ChatComponent implements OnInit, OnDestroy {
           this.removeLoading();
         }
       });
+    
+    if (this.selectedConversation?.id && this.siteId) {
+      this.lastConvService.setLastConversationId(this.siteId, this.selectedConversation.id);
+    }
   }
 
   private removeLoading() {
@@ -174,6 +183,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   selectConversation(conv: Conversation) {
     this.selectedConversation = conv;
+    if (this.siteId && conv?.id) {
+      this.lastConvService.setLastConversationId(this.siteId, conv.id);
+    }
 
     if (this.mercureSub) {
       this.mercureSub.unsubscribe();
@@ -232,6 +244,10 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (this.mercureSub) {
       this.mercureSub.unsubscribe();
       this.mercureSub = undefined;
+    }
+
+    if (this.selectedConversation?.id) {
+      this.lastConvService.clearLastConversation(this.siteId);
     }
 
     // reset état

@@ -4,6 +4,17 @@ import { Observable } from 'rxjs';
 import { Conversation } from 'src/app/models/conversation/conversation';
 import { Message } from 'src/app/models/message/message';
 import { environment } from 'src/environments/environment';
+import { throwError, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+
+
+function handleChatError<T>(fallback: T) {
+  return catchError((err: any) => {
+    console.error('ChatService error:', err);
+    // éventuellement afficher toast UX ici
+    return of(fallback);
+  });
+}
 
 @Injectable({
   providedIn: 'root'

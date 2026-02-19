@@ -2,6 +2,9 @@
   <button class="el-close-btn" (click)="closeWidget()">
     <img src="../../../assets/svg/close-md-svgrepo-com.svg" alt="" />
   </button>
+  <div *ngIf="loadingLastConversation" class="global-spinner">
+    <app-spinner></app-spinner> <!-- composant spinner réutilisable -->
+  </div>
   <router-outlet></router-outlet>
 </main>
 

@@ -1,6 +1,10 @@
 <div class="el-screen el-bot" *ngIf="hasConversations && !isCreatingConversation">
     <div class="el-header">
-        <button type="button" class="el-new-chat">New chat</button>
+        
+        <button type="button" class="el-new-chat" (click)="startNewChat()">
+            New chat
+        </button>
+    
     </div>
 
     <div class="el-chat-conversations">

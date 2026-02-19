@@ -1,11 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { Conversation } from 'src/app/models/conversation/conversation';
-import { Message } from 'src/app/models/message/message';
 import { ChatService } from 'src/app/services/chat/chat.service';
-import { ConversationService } from 'src/app/services/conversation/conversation.service';
-import { MercureService } from 'src/app/services/mercure/mercure.service';
+import { LastConversationService } from 'src/app/services/last-conversation/last-conversation.service';
 import { WidgetService } from 'src/app/services/widget/widget.service';
 
 @Component({
@@ -28,9 +27,14 @@ export class ConversationComponent implements OnInit, OnDestroy {
   isChatStarted = false;
   isCreatingConversation = false;
 
+  private siteIdSub?: Subscription;
 
-
-  constructor(private chatService: ChatService, private widgetService: WidgetService, private router: Router) { }
+  constructor(
+    private chatService: ChatService,
+    private widgetService: WidgetService,
+    private router: Router,
+    private lastConvService: LastConversationService
+  ) { }
 
   ngOnInit(): void {
     const initialSiteId = this.widgetService.getSiteId();
@@ -39,7 +43,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       this.loadConversations(this.siteId);
     }
 
-    this.widgetService.siteId$.subscribe(id => {
+    this.siteIdSub = this.widgetService.siteId$.subscribe(id => {
       if (id && id !== this.siteId) {
         this.siteId = id;
         this.loadConversations(this.siteId);
@@ -80,11 +84,15 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   selectConversation(conv: Conversation) {
     this.selectedConversation = conv;
+    if (this.siteId && conv?.id) {
+      this.lastConvService.setLastConversationId(this.siteId, conv.id);
+    }
   }
 
   ngOnDestroy(): void {
     // 🔹 Cleanup
     if (this.mercureSub) this.mercureSub.unsubscribe();
+    if (this.siteIdSub) this.siteIdSub.unsubscribe();
   }
 
   onSubmit(chatForm: NgForm): void {
@@ -111,5 +119,27 @@ export class ConversationComponent implements OnInit, OnDestroy {
       });
   }
 
+  startNewChat(): void {
+    console.log("bonjour");
+    
+    // stop mercure sur l'ancienne conversation
+    if (this.mercureSub) {
+      console.log("mercure unsub");
+      this.mercureSub.unsubscribe();
+      this.mercureSub = undefined;
+    }
+
+    if (this.selectedConversation?.id) {
+      console.log("dans last conv service");
+      this.lastConvService.clearLastConversation(this.siteId);
+    }
+
+    console.log("après last conv service");
+    // reset état
+    this.selectedConversation = undefined;
+    this.messageContent = '';
+    this.isChatStarted = false;
+
+  }
   
 }

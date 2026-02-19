@@ -15,6 +15,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WelcomComponent } from './pages/welcom/welcom.component';
 import { ConversationComponent } from './pages/conversation/conversation.component';
 import { TruncatePipe } from './pipes/truncate/truncate.pipe';
+import { SpinnerComponent } from './components/spinner/spinner.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { TruncatePipe } from './pipes/truncate/truncate.pipe';
     ChatComponent,
     WelcomComponent,
     ConversationComponent,
-    TruncatePipe
+    TruncatePipe,
+    SpinnerComponent
   ],
   imports: [
     BrowserModule,

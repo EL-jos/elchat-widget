@@ -661,6 +661,7 @@ form.el-chat-input-area .el-btn-send-message img {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    gap: 1rem;
 }
 
 .el-header .el-btn-back {
