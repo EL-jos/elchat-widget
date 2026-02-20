@@ -6,13 +6,16 @@ import { Conversation } from 'src/app/models/conversation/conversation';
 import { ChatService } from 'src/app/services/chat/chat.service';
 import { LastConversationService } from 'src/app/services/last-conversation/last-conversation.service';
 import { WidgetService } from 'src/app/services/widget/widget.service';
+// Ajoute ces imports avec les autres
+import { VoiceService, VoiceState } from '../../services/voice/voice.service'; // ← Ajuste le chemin
+import { ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 
 @Component({
   selector: 'app-conversation',
   templateUrl: './conversation.component.html',
   styleUrls: ['./conversation.component.css']
 })
-export class ConversationComponent implements OnInit, OnDestroy {
+export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
 
   conversations: Conversation[] = [];
   error?: string;
@@ -27,13 +30,23 @@ export class ConversationComponent implements OnInit, OnDestroy {
   isChatStarted = false;
   isCreatingConversation = false;
 
+  // 🔹 Voice API (STT uniquement)
+  voiceState: VoiceState = { isListening: false, isSpeaking: false };
+  voiceSubscription?: Subscription;
+  visualizerCanvas?: HTMLCanvasElement;
+  isVisualizerActive = false;
+
+  // 🔹 Référence pour le canvas via @ViewChild
+  @ViewChild('visualizerCanvas') visualizerCanvasRef?: ElementRef<HTMLCanvasElement>;
+
   private siteIdSub?: Subscription;
 
   constructor(
     private chatService: ChatService,
     private widgetService: WidgetService,
     private router: Router,
-    private lastConvService: LastConversationService
+    private lastConvService: LastConversationService,
+    public voiceService: VoiceService  // ← AJOUTER CETTE LIGNE
   ) { }
 
   ngOnInit(): void {
@@ -50,10 +63,100 @@ export class ConversationComponent implements OnInit, OnDestroy {
       }
     });
 
-    console.log(this.siteId);
-    
+    // 🔹 Initialisation Voice API (AJOUTER à la fin de ngOnInit)
+    this.initVoice();
   }
 
+  // Ajoute cette méthode dans la classe
+  ngAfterViewInit(): void {
+    if (this.visualizerCanvasRef?.nativeElement) {
+      this.setVisualizerCanvas(this.visualizerCanvasRef.nativeElement);
+    }
+  }
+
+  // Ajoute cette méthode privée
+  private initVoice(): void {
+    this.voiceSubscription = this.voiceService.state$.subscribe(state => {
+      this.voiceState = state;
+
+      // Gérer les erreurs
+      if (state.error) {
+        this.error = state.error;
+        setTimeout(() => this.error = undefined, 3000);
+      }
+
+      // Si STT terminé avec transcript → remplir le textarea
+      if (state.transcript && !state.isListening) {
+        this.handleVoiceTranscript(state.transcript);
+      }
+    });
+  }
+
+  // Ajoute cette méthode privée
+  private handleVoiceTranscript(text: string): void {
+    if (!text?.trim()) return;
+
+    // Remplir le textarea avec le texte reconnu
+    this.messageContent = text;
+
+    // Optionnel : auto-envoyer le message (décommente si souhaité)
+    // this.autoSendVoiceMessage(text);
+
+    // Reset du transcript
+    this.voiceService.resetTranscript();
+  }
+
+  // Optionnel : méthode pour auto-envoyer après reconnaissance
+  private autoSendVoiceMessage(text: string): void {
+    if (!text?.trim()) return;
+
+    const chatForm = { resetForm: () => { } } as any; // Dummy pour onSubmit
+    this.messageContent = text;
+    this.onSubmit(chatForm);
+  }
+
+  // 🔹 STT : Démarrer/Arrêter l'écoute
+  toggleVoiceInput(): void {
+    if (this.voiceState.isListening) {
+      this.stopVoiceInput();
+    } else {
+      this.startVoiceInput();
+    }
+  }
+
+  private async startVoiceInput(): Promise<void> {
+    // Éviter les doublons
+    if (this.isVisualizerActive || this.voiceState.isListening) {
+      return;
+    }
+
+    try {
+      // Démarrer le visualizer si canvas disponible
+      if (this.visualizerCanvas) {
+        this.isVisualizerActive = true;
+        await this.voiceService.startVisualizer(this.visualizerCanvas);
+      }
+
+      // Démarrer la reconnaissance
+      await this.voiceService.startListening((text) => {
+        // Géré via observable
+      });
+    } catch (err) {
+      this.error = typeof err === 'string' ? err : 'Erreur microphone';
+      this.stopVoiceInput();
+    }
+  }
+
+  private stopVoiceInput(): void {
+    this.voiceService.stopListening();
+    this.voiceService.stopVisualizer();
+    this.isVisualizerActive = false;
+  }
+
+  // 🔹 Setter pour le canvas
+  private setVisualizerCanvas(canvas: HTMLCanvasElement | null): void {
+    this.visualizerCanvas = canvas ?? undefined;
+  }
 
   loadConversations(siteId: string): void {
     this.chatService.getUserConversations(siteId).subscribe({
@@ -93,6 +196,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
     // 🔹 Cleanup
     if (this.mercureSub) this.mercureSub.unsubscribe();
     if (this.siteIdSub) this.siteIdSub.unsubscribe();
+    // 🔹 Cleanup Voice API (AJOUTER)
+    if (this.voiceSubscription) this.voiceSubscription.unsubscribe();
+    this.voiceService.cleanup();
   }
 
   onSubmit(chatForm: NgForm): void {
@@ -135,6 +241,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
     }
 
     console.log("après last conv service");
+    // ✅ Ajouter ce cleanup voice
+    this.stopVoiceInput();
+    
     // reset état
     this.selectedConversation = undefined;
     this.messageContent = '';

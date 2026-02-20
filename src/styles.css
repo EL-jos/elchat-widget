@@ -528,9 +528,10 @@ body::-webkit-scrollbar,
 form.el-chat-input-area {
     display: flex;
     width: 100%;
-    height: 200px;
+    height: 130px;
     position: absolute;
     bottom: 0;
+    z-index: 2;
 }
 
 #el-main-component .el-bot .el-chat-messages+form.el-chat-input-area {
@@ -555,9 +556,9 @@ form.el-chat-input-area .el-chat-input:focus {
     border-color: var(--primary-color);
 }
 
-form.el-chat-input-area .el-btn-send-message {
+form.el-chat-input-area .el-btn-send-message,
+form.el-chat-input-area .el-btn-voice  {
     position: absolute;
-    right: 10px;
     bottom: -10px;
     transform: translateY(-50%);
     display: flex;
@@ -566,15 +567,23 @@ form.el-chat-input-area .el-btn-send-message {
     width: 40px;
     height: 40px;
     border-radius: 50%;
+    transition: all 0.2s;
+}form.el-chat-input-area .el-btn-send-message{
+    right: 10px;
+}form.el-chat-input-area .el-btn-voice {
+    right: 60px;
 }
 
-form.el-chat-input-area .el-btn-send-message:hover {
+form.el-chat-input-area .el-btn-send-message:hover,
+form.el-chat-input-area .el-btn-voice:hover {
+    transform: translateY(-50%) scale(1.05);
+    background-color: var(--primary-color);
     cursor: pointer;
     box-shadow: 0 0 10px rgba(0, 0, 0, .15);
-    background-color: var(--primary-color);
 }
 
-form.el-chat-input-area .el-btn-send-message img {
+form.el-chat-input-area .el-btn-send-message img,
+form.el-chat-input-area .el-btn-voice img {
     width: 20px;
     height: 20px;
     filter: invert(1);
@@ -707,4 +716,96 @@ form.el-chat-input-area .el-btn-send-message img {
 
 .el-screen.el-bot.el-new-conversation {
     width: 310px !important;
+}
+
+
+/* === Visualizer === */
+.el-visualizer-container {
+    overflow: hidden;
+    display: none;
+    transition: all 0.3s ease;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
+.el-visualizer-container.active {
+    display: flex;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: scale(0);
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+        visibility: visible;
+        pointer-events: auto;
+    }
+}
+
+.el-visualizer-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #94a3b8;
+    font-size: 0.8rem;
+    z-index: 1;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}.el-visualizer-placeholder img{
+    width: 20px;
+}
+
+.el-visualizer-canvas {
+    width: 250px;
+    height: 100px;
+    display: block;
+    position: relative;
+    z-index: 3;
+}
+
+/* === Bouton Voice === */
+
+
+
+.el-btn-voice.listening {
+    background: #dc2626;
+    animation: pulse 1.5s infinite;
+}
+
+.el-btn-voice:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+    }
 }

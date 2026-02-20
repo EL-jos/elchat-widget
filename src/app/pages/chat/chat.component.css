@@ -1,0 +1,72 @@
+/* === Bouton TTS sur messages === */
+.el-btn-tts {
+    background: rgba(79, 70, 229, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: #4f46e5;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+}
+
+.el-btn-tts:hover {
+    background: rgba(79, 70, 229, 0.2);
+    transform: scale(1.1);
+}
+
+.el-btn-tts.playing {
+    background: #16a34a;
+    color: white;
+    animation: pulse 1s infinite;
+}
+
+/* === Messages === */
+.el-message {
+    animation: fadeIn 0.3s ease;
+    position: relative;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.el-message-content {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+/* === Status bar === */
+.el-status-bar {
+    padding: 0.5rem 1rem;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.85rem;
+    text-align: center;
+    display: none;
+}
+
+.el-status-bar.visible {
+    display: block;
+}
+
+.el-status-bar.error {
+    background: #fee2e2;
+    color: #991b1b;
+}

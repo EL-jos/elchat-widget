@@ -1,10 +1,10 @@
 <div class="el-screen el-bot" *ngIf="hasConversations && !isCreatingConversation">
     <div class="el-header">
-        
+
         <button type="button" class="el-new-chat" (click)="startNewChat()">
             New chat
         </button>
-    
+
     </div>
 
     <div class="el-chat-conversations">
@@ -28,11 +28,25 @@
         <p>How may I help you?</p>
     </div>
 
+    <!-- Juste avant le <form>, ajouter : -->
+    <div class="el-visualizer-container" [class.active]="isVisualizerActive">
+        <div class="el-visualizer-placeholder" *ngIf="isVisualizerActive"><img src="../../../assets/svg/microphone-voice-recording-svgrepo-com.svg" alt=""> Enregistrement...</div>
+        <canvas #visualizerCanvas class="el-visualizer-canvas"></canvas>
+    </div>
+
     <form class="el-chat-input-area" (ngSubmit)="onSubmit(chatForm)" #chatForm="ngForm">
 
         <textarea class="el-chat-input" placeholder="Type your message here..." [(ngModel)]="messageContent"
             name="message">
     </textarea>
+
+        <!-- 🔹 Bouton Voice (AJOUTER) -->
+        <button type="button" class="el-btn-voice" (click)="toggleVoiceInput()"
+            [class.listening]="voiceState.isListening" [disabled]="!voiceService.isSupported()"
+            title="{{ voiceService.isSupported() ? 'Message vocal' : 'Non supporté' }}">
+            <img *ngIf="!voiceState.isListening" src="../../../assets/svg/microphone-voice-recording-svgrepo-com.svg" alt="Microphone">
+            <img *ngIf="voiceState.isListening" src="../../../assets/svg/stop-button-black-rounded-square-svgrepo-com.svg" alt="Stop">
+        </button>
 
         <button type="submit" class="el-btn-send-message">
             <img src="../../../assets/svg/send-2-svgrepo-com.svg" alt="">

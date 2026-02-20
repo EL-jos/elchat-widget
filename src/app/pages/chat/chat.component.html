@@ -1,3 +1,12 @@
+<!-- ✅ Canvas UNIQUE, placé AVANT les écrans conditionnels -->
+<div class="el-visualizer-container" [class.active]="isVisualizerActive">
+    <div class="el-visualizer-placeholder" *ngIf="isVisualizerActive">
+        <img src="../../../assets/svg/microphone-voice-recording-svgrepo-com.svg" alt="">
+        Enregistrement...
+    </div>
+    <canvas #visualizerCanvas class="el-visualizer-canvas"></canvas>
+</div>
+
 <div class="el-screen el-bot" *ngIf="isChatStarted">
     <div class="el-header">
         <button type="button" class="el-new-chat" routerLink="/conversations">
@@ -19,15 +28,32 @@
                 <ng-container *ngIf="msg.id==='loading'">
                     <img src="../../../assets/svg/loading-black.svg" alt="">
                 </ng-container>
-                <p>{{ msg.content }}</p>
+                <!-- 🔹 Contenu + Bouton TTS pour les messages bot (AJOUTER) -->
+                <ng-container *ngIf="msg.id!=='loading'">
+                    <p class="el-message-content">{{ msg.content }}</p>
+                
+                    <!-- Bouton TTS uniquement pour les messages du bot -->
+                    <button *ngIf="msg.role === 'bot'" type="button" class="el-btn-tts" [class.playing]="speakingMessageIds.has(msg.id)"
+                        (click)="playMessageTTS(msg.id, msg.content)" title="Écouter le message">
+                        <span *ngIf="!speakingMessageIds.has(msg.id)">🔊</span>
+                        <span *ngIf="speakingMessageIds.has(msg.id)">⏹️</span>
+                    </button>
+                </ng-container>
             </div>
         </ng-container>
 
     </div>
-    
 
     <form class="el-chat-input-area" (ngSubmit)="onSubmit(chatForm)" #chatForm="ngForm">
-        <textarea type="text" class="el-chat-input" placeholder="Type your message here..." [(ngModel)]="messageContent" name="message"></textarea>
+        <textarea type="text" class="el-chat-input" placeholder="Type your message here..." [(ngModel)]="messageContent"
+            name="message"></textarea>
+        <!-- 🔹 Bouton Voice (AJOUTER) -->
+        <button type="button" class="el-btn-voice" (click)="toggleVoiceInput()"
+            [class.listening]="voiceState.isListening" [disabled]="!voiceService.isSupported()"
+            title="{{ voiceService.isSupported() ? 'Message vocal' : 'Non supporté' }}">
+            <img *ngIf="!voiceState.isListening" src="../../../assets/svg/microphone-voice-recording-svgrepo-com.svg" alt="">
+            <img *ngIf="voiceState.isListening" src="../../../assets/svg/stop-button-black-rounded-square-svgrepo-com.svg" alt="">
+        </button>
         <button type="submit" class="el-btn-send-message">
             <img src="../../../assets/svg/send-2-svgrepo-com.svg" alt="">
         </button>
@@ -44,6 +70,14 @@
     <form class="el-chat-input-area" (ngSubmit)="onSubmit(chatForm)" #chatForm="ngForm">
         <textarea type="text" class="el-chat-input" placeholder="Type your message here..." [(ngModel)]="messageContent"
             name="message"></textarea>
+        <!-- 🔹 Bouton Voice (AJOUTER) -->
+        <button type="button" class="el-btn-voice" (click)="toggleVoiceInput()"
+            [class.listening]="voiceState.isListening" [disabled]="!voiceService.isSupported()"
+            title="{{ voiceService.isSupported() ? 'Message vocal' : 'Non supporté' }}">
+            <img *ngIf="!voiceState.isListening" src="../../../assets/svg/microphone-voice-recording-svgrepo-com.svg" alt="">
+            <img *ngIf="voiceState.isListening" src="../../../assets/svg/stop-button-black-rounded-square-svgrepo-com.svg" alt="">
+        </button>
+
         <button type="submit" class="el-btn-send-message">
             <img src="../../../assets/svg/send-2-svgrepo-com.svg" alt="">
         </button>

@@ -4,13 +4,16 @@
     gap: 8px;
     background-color: var(--triad-color);
     font-family: var(--font-family);
-}/* Item */
+}
+
+/* Item */
 .el-conversation-item {
     background-color: #fff;
     border-radius: 10px;
     transition: background-color .3s ease, box-shadow .3s ease, transform .3s ease;
     cursor: pointer;
 }
+
 /* Lien full width */
 .el-conversation-item a {
     display: flex;
@@ -20,6 +23,7 @@
     text-decoration: none;
     color: inherit;
 }
+
 /* Titre du message */
 .el-conversation-title {
     font-size: 15px;
@@ -40,9 +44,13 @@
     background-color: var(--primary-color);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     transform: scale(.97);
-}.el-conversation-item:hover .el-conversation-title {
+}
+
+.el-conversation-item:hover .el-conversation-title {
     color: #fff;
-}.el-conversation-item:hover span {
+}
+
+.el-conversation-item:hover span {
     color: #eee;
 }
 
