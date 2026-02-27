@@ -159,6 +159,7 @@ body::-webkit-scrollbar,
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     width: 100%;
     transition: all 0.3s ease;
+    text-decoration: none;
 }
 
 .el-screen .el-sin-up-with img {
@@ -808,4 +809,16 @@ form.el-chat-input-area .el-btn-voice img {
     100% {
         box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
     }
+}
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.snackbar-success {
+    background-color: #2e7d32 !important;
+    color: #fff !important;
+}
+
+.snackbar-error {
+    background-color: #c62828 !important;
+    color: #fff !important;
 }

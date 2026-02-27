@@ -35,7 +35,7 @@ export class AuthService {
   }
 
   verifyEmail(payload: { email: string, code: string, site_id?: string }) {
-    return this.http.post<{ token: string; user: User }>(
+    return this.http.post<{ token: string; user: User; message: string }>(
       `${this.api}/verify-code`,
       payload
     ).pipe(
@@ -80,6 +80,17 @@ export class AuthService {
 
   logout() {
     localStorage.clear();
+  }
+
+  facebookAuth(payload: { facebook_token: string; site_id: string, is_admin: boolean; mode?: 'login' | 'register' }) {
+    console.log(payload);
+    
+    return this.http.post<{ ok: boolean; message: string; user: User }>(
+      `${this.api}/${payload.mode === 'register' ? 'register' : 'login'}`,
+      payload
+    ).pipe(
+      tap(res => this.storeAuth(res))
+    );
   }
 
 }

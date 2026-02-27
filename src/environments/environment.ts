@@ -5,8 +5,8 @@
 export const environment = {
   production: false,
   serveur: {
-    url: "http://127.0.0.1:8000/api/v1",
-    mercureHub: "http://localhost:3000/.well-known/mercure"
+    url: "https://elchat.io/api/v1",
+    mercureHub: "https://viewball360.com:3000/.well-known/mercure"
   },
   encryptionKey: 'Eljo$22@',
   settings: {

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth/auth.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-new-password',
@@ -17,7 +18,8 @@ export class NewPasswordComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private snackBar: MatSnackBar   // ✅ AJOUT
   ) { }
 
   ngOnInit(): void {
@@ -46,16 +48,35 @@ export class NewPasswordComponent implements OnInit {
     this.authService.resetPassword({ email: this.email, code, password, password_confirmation })
       .subscribe({
         next: (res) => {
-          console.log('✅ Password reset success:', res);
+          this.showSnack('Mot de passe réinitialisé avec succès', 'success');
           this.loading = false;
           this.router.navigate(['/sign-in']);
         },
         error: (err) => {
-          console.error('❌ Password reset error:', err);
-          this.error = err.error?.message || 'Erreur lors de la réinitialisation du mot de passe';
           this.loading = false;
+
+          if (err.status === 422) {
+            this.showSnack(err.error?.message || 'Code invalide ou expiré.', 'error');
+          }
+          else if (err.status === 429) {
+            this.showSnack(err.error?.message || 'Code bloqué. Demandez un nouveau code.', 'error');
+          }
+          else {
+            this.showSnack('Erreur serveur. Veuillez réessayer.', 'error');
+          }
         }
       });
+  }
+
+  private showSnack(message: string, type: 'success' | 'error' = 'success') {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 4000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: type === 'success'
+        ? ['snackbar-success']
+        : ['snackbar-error']
+    });
   }
 
 }

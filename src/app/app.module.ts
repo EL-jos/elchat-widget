@@ -16,6 +16,8 @@ import { WelcomComponent } from './pages/welcom/welcom.component';
 import { ConversationComponent } from './pages/conversation/conversation.component';
 import { TruncatePipe } from './pipes/truncate/truncate.pipe';
 import { SpinnerComponent } from './components/spinner/spinner.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @NgModule({
   declarations: [
@@ -36,14 +38,16 @@ import { SpinnerComponent } from './components/spinner/spinner.component';
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
-    HttpClientModule
+    HttpClientModule,
+    BrowserAnimationsModule,
+    MatSnackBarModule,
   ],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,
       multi: true // ⚠️ OBLIGATOIRE
-    }
+    },
   ],
   bootstrap: [AppComponent]
 })

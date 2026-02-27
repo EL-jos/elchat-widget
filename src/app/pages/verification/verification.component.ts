@@ -1,15 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth/auth.service';
 import { WidgetService } from 'src/app/services/widget/widget.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
 
 @Component({
   selector: 'app-verification',
   templateUrl: './verification.component.html',
   styleUrls: ['./verification.component.css']
 })
-export class VerificationComponent implements OnInit {
+export class VerificationComponent implements OnInit, OnDestroy {
 
 
   email!: string;
@@ -24,7 +26,8 @@ export class VerificationComponent implements OnInit {
     private route: ActivatedRoute,
     private authService: AuthService,
     private router: Router,
-    private widgetService: WidgetService
+    private widgetService: WidgetService,
+    private snackBar: MatSnackBar   // ✅ AJOUT
   ) { }
 
   ngOnInit(): void {
@@ -49,6 +52,12 @@ export class VerificationComponent implements OnInit {
     this.startResendTimer(1);
   }
 
+  ngOnDestroy(): void {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
+  }
+
   private startResendTimer(minutes: number): void {
     // clear ancien timer
     if (this.timerInterval) {
@@ -69,8 +78,7 @@ export class VerificationComponent implements OnInit {
   }
 
   onSubmit(form: NgForm): void {
-    if (!form.valid) return;
-
+  
     const code =
       form.value.code0 +
       form.value.code1 +
@@ -87,13 +95,16 @@ export class VerificationComponent implements OnInit {
       code,
       site_id: this.siteId
     }).subscribe({
-      next: () => {
+      next: (res) => {
         // ✅ JWT stocké via AuthService
+        this.showSnack(res.message, 'success');
+        this.loading = false;
         this.router.navigate(['/conversations']);
       },
       error: () => {
         this.loading = false;
         this.error = 'Code invalide ou expiré.';
+        this.showSnack(this.error, 'error');
       }
     });
   }
@@ -101,27 +112,64 @@ export class VerificationComponent implements OnInit {
   resendCode(): void {
     if (this.resendDisabled) return;
 
+    this.loading = true;
+    this.resendDisabled = true; // ✅ bloque le bouton immédiatement
+
     this.authService.resendCode(this.email).subscribe({
       next: (response: any) => {
-        console.log('✅ Resend code success:', response);
-
+        this.showSnack(response.message, 'success');
         // ⏱️ le serveur décide du temps
-        if (response?.expires_in) {
-          this.startResendTimer(response.expires_in);
-        }
+        const expiresIn = response?.expires_in ?? 1; // fallback 1 minute
+        this.startResendTimer(expiresIn);
+        this.loading = false;
       },
       error: (error) => {
         console.error('❌ Resend code error:', error);
+        this.showSnack(error.error?.message || 'Erreur lors du renvoi du code', 'error');
+        // Si erreur, on autorise de recliquer
+        this.resendDisabled = false;
+        this.loading = false;
       }
     });
   }
 
+  get resendMinutes(): number {
+    return Math.floor(this.resendTimer / 60);
+  }
 
+  get resendSeconds(): string {
+    const sec = this.resendTimer % 60;
+    return sec < 10 ? '0' + sec : '' + sec;
+  }
 
   onInput(event: any, next?: HTMLInputElement) {
-    if (event.target.value && next) {
+    const value = event.target.value;
+
+    // Convertit automatiquement en majuscule pour plus de confort
+    event.target.value = value.toUpperCase();
+
+    // Si l'utilisateur tape un caractère valide, passe au champ suivant
+    if (value && next) {
       next.focus();
     }
+
+    // Permet de gérer les suppressions pour revenir en arrière
+    if (!value && event.inputType === 'deleteContentBackward') {
+      const prevDiv = event.target.parentElement?.previousElementSibling;
+      const prevInput = prevDiv?.querySelector('input') as HTMLInputElement;
+      if (prevInput) prevInput.focus();
+    }
+  }
+
+  private showSnack(message: string, type: 'success' | 'error' = 'success') {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 4000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: type === 'success'
+        ? ['snackbar-success']
+        : ['snackbar-error']
+    });
   }
 
 }
