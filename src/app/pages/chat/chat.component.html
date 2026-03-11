@@ -47,7 +47,7 @@
     </div>
 
     <form class="el-chat-input-area" (ngSubmit)="onSubmit(chatForm)" #chatForm="ngForm">
-        <textarea type="text" class="el-chat-input" placeholder="Type your message here..." [(ngModel)]="messageContent"
+        <textarea type="text" class="el-chat-input" [placeholder]="settings.input_placeholder" [(ngModel)]="messageContent"
             name="message"></textarea>
         <!-- 🔹 Bouton Voice (AJOUTER) -->
         <button type="button" class="el-btn-voice" (click)="toggleVoiceInput()"

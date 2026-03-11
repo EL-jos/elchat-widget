@@ -14,6 +14,7 @@ import { v4 as uuidv4Lib } from 'uuid';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VisitorService } from 'src/app/services/visitor/visitor.service';
 import { AuthService } from 'src/app/services/auth/auth.service';
+import { WidgetSetting } from 'src/app/models/widget-settings/widget-settings';
 
 @Component({
   selector: 'app-chat',
@@ -48,6 +49,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   // Ajoute dans la classe
   @ViewChild('visualizerCanvas') visualizerCanvasRef?: ElementRef<HTMLCanvasElement>;
 
+  settings: WidgetSetting = new WidgetSetting();
+
   constructor(
     private route: ActivatedRoute,
     private chatService: ChatService,
@@ -68,67 +71,19 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     if (initialSiteId) {
       //console.log("RECUPERATION DU SITE ID A PARTIR DE WIDGET SERVICE");
 
-      this.siteId = initialSiteId;
-
-      // récupérer UUID du visiteur
-      let visitorUUID: string | undefined;
-      if (!this.authService.isAuthenticated) {
-        visitorUUID = this.widgetService.getVisitorUUID();
-      }
-
-      if (this.authService.isAuthenticated) {
-
-        // utilisateur connecté → conversation depuis URL
-        if (this.conversationId) {
-          this.loadMessage(this.conversationId, this.siteId);
-        }
-
-      } else {
-
-        // visiteur anonyme → conversation depuis localStorage
-        const lastConvId = this.lastConvService.getLastConversationId(
-          this.siteId,
-          visitorUUID
-        );
-
-        if (lastConvId) {
-          this.loadMessage(lastConvId, this.siteId, visitorUUID);
-        }
-
-      }
+      this.handleSiteId(initialSiteId);
     }
 
     this.widgetService.siteId$.subscribe(id => {
       if (id && id !== this.siteId) {
         //console.log("RECUPERATION DU SITE ID A PARTIR DE WIDGET SERVICE AVEC SUJET");
-        this.siteId = id;
-
-        // récupérer UUID du visiteur
-        let visitorUUID: string | undefined;
-        if (!this.authService.isAuthenticated) {
-          visitorUUID = this.widgetService.getVisitorUUID();
-        }
-
-        if (this.authService.isAuthenticated) {
-
-          if (this.conversationId) {
-            this.loadMessage(this.conversationId, this.siteId);
-          }
-
-        }
-        else {
-
-          const lastConvId = this.lastConvService.getLastConversationId(
-            this.siteId,
-            visitorUUID
-          );
-
-          if (lastConvId) {
-            this.loadMessage(lastConvId, this.siteId, visitorUUID);
-          }
-
-        }
+        this.handleSiteId(id);
       }
+    });
+
+    // 🔹 S’abonner aux changements de settings
+    this.widgetService.setting$.subscribe(settings => {
+      if (settings) this.settings = settings;
     });
 
     // 🔹 Initialisation Voice API
@@ -137,6 +92,31 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       console.warn('Voice API non supportée sur ce navigateur');
       // Optionnel : afficher un message discret dans l'UI
     }
+  }
+
+  // 🔹 Méthode pour centraliser le traitement du siteId
+  private handleSiteId(siteId: string) {
+    this.siteId = siteId;
+
+    let visitorUUID: string | undefined;
+    if (!this.authService.isAuthenticated) {
+      visitorUUID = this.widgetService.getVisitorUUID();
+    }
+
+    // Charger la conversation
+    if (this.authService.isAuthenticated) {
+      if (this.conversationId) {
+        this.loadMessage(this.conversationId, this.siteId);
+      }
+    } else {
+      const lastConvId = this.lastConvService.getLastConversationId(this.siteId, visitorUUID);
+      if (lastConvId) {
+        this.loadMessage(lastConvId, this.siteId, visitorUUID);
+      }
+    }
+
+    // Charger le widget setting
+    this.widgetService.loadWidgetSettings(this.siteId).subscribe();
   }
 
   // Modifie ngOnInit ou ajoute ngAfterViewInit

@@ -10,6 +10,7 @@ import { WidgetService } from 'src/app/services/widget/widget.service';
 import { VoiceService, VoiceState } from '../../services/voice/voice.service'; // ← Ajuste le chemin
 import { ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { AuthService } from 'src/app/services/auth/auth.service';
+import { WidgetSetting } from 'src/app/models/widget-settings/widget-settings';
 
 @Component({
   selector: 'app-conversation',
@@ -41,6 +42,9 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('visualizerCanvas') visualizerCanvasRef?: ElementRef<HTMLCanvasElement>;
 
   private siteIdSub?: Subscription;
+  private settingSub?: Subscription;
+
+  settings: WidgetSetting = new WidgetSetting();
 
   constructor(
     private chatService: ChatService,
@@ -54,19 +58,34 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     const initialSiteId = this.widgetService.getSiteId();
     if (initialSiteId) {
-      this.siteId = initialSiteId;
-      this.loadConversations(this.siteId);
+      this.handleSiteId(initialSiteId);
     }
 
     this.siteIdSub = this.widgetService.siteId$.subscribe(id => {
       if (id && id !== this.siteId) {
-        this.siteId = id;
-        this.loadConversations(this.siteId);
+        this.handleSiteId(id);
+      }
+    });
+
+    // 🔹 S’abonner aux changements de settings
+    this.settingSub = this.widgetService.setting$.subscribe(settings => {
+      if (settings) {
+        this.settings = settings;
+        // Ici tu peux accéder à toutes les propriétés du widget
+        // ex: this.settings.theme_primary, this.settings.button_text, etc.
       }
     });
 
     // 🔹 Initialisation Voice API (AJOUTER à la fin de ngOnInit)
     this.initVoice();
+  }
+
+  private handleSiteId(siteId: string) {
+    this.siteId = siteId;
+    this.loadConversations(this.siteId);
+
+    // 🔹 Charger le widget settings pour ce site
+    this.widgetService.loadWidgetSettings(this.siteId).subscribe();
   }
 
   // Ajoute cette méthode dans la classe
@@ -196,7 +215,7 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  onSelectedConversation(conv: Conversation){
+  onSelectedConversation(conv: Conversation) {
     this.selectConversation(conv);
     this.router.navigate(['/chat', conv.id]);
   }
@@ -205,6 +224,7 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
     // 🔹 Cleanup
     if (this.mercureSub) this.mercureSub.unsubscribe();
     if (this.siteIdSub) this.siteIdSub.unsubscribe();
+    if (this.settingSub) this.settingSub.unsubscribe();
     // 🔹 Cleanup Voice API (AJOUTER)
     if (this.voiceSubscription) this.voiceSubscription.unsubscribe();
     this.voiceService.cleanup();
@@ -219,7 +239,7 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // 🔥 feedback immédiat
     this.isCreatingConversation = true;
-    
+
     const visitorUUID = !this.authService.isAuthenticated ? this.widgetService.getVisitorUUID() : undefined;
 
     // 🔥 envoi SANS conversation_id
@@ -239,7 +259,7 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
 
   startNewChat(): void {
     //console.log("bonjour");
-    
+
     // stop mercure sur l'ancienne conversation
     if (this.mercureSub) {
       //console.log("mercure unsub");
@@ -255,12 +275,12 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
     //console.log("après last conv service");
     // ✅ Ajouter ce cleanup voice
     this.stopVoiceInput();
-    
+
     // reset état
     this.selectedConversation = undefined;
     this.messageContent = '';
     this.isChatStarted = false;
 
   }
-  
+
 }
