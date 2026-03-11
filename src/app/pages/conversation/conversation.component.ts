@@ -9,6 +9,7 @@ import { WidgetService } from 'src/app/services/widget/widget.service';
 // Ajoute ces imports avec les autres
 import { VoiceService, VoiceState } from '../../services/voice/voice.service'; // ← Ajuste le chemin
 import { ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { AuthService } from 'src/app/services/auth/auth.service';
 
 @Component({
   selector: 'app-conversation',
@@ -46,7 +47,8 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
     private widgetService: WidgetService,
     private router: Router,
     private lastConvService: LastConversationService,
-    public voiceService: VoiceService  // ← AJOUTER CETTE LIGNE
+    public voiceService: VoiceService,  // ← AJOUTER CETTE LIGNE
+    private authService: AuthService  // ← SI TU AS UN SERVICE D'AUTHENTIFICATION
   ) { }
 
   ngOnInit(): void {
@@ -159,7 +161,8 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   loadConversations(siteId: string): void {
-    this.chatService.getUserConversations(siteId).subscribe({
+    const visitorUUID = this.widgetService.getVisitorUUID();
+    this.chatService.getUserConversations(siteId, visitorUUID).subscribe({
       next: (convs) => {
         convs.sort((a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -187,8 +190,9 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
 
   selectConversation(conv: Conversation) {
     this.selectedConversation = conv;
+    const visitorUUID = this.widgetService.getVisitorUUID();
     if (this.siteId && conv?.id) {
-      this.lastConvService.setLastConversationId(this.siteId, conv.id);
+      this.lastConvService.setLastConversationId(this.siteId, conv.id, visitorUUID);
     }
   }
 
@@ -210,9 +214,11 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // 🔥 feedback immédiat
     this.isCreatingConversation = true;
+    
+    const visitorUUID = !this.authService.isAuthenticated ? this.widgetService.getVisitorUUID() : undefined;
 
     // 🔥 envoi SANS conversation_id
-    this.chatService.sendMessage(null as any, content, this.siteId)
+    this.chatService.sendMessage(null as any, content, this.siteId, visitorUUID)
       .subscribe({
         next: (res: any) => {
           // 🔁 redirection vers ChatComponent

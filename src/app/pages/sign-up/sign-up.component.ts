@@ -4,6 +4,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth/auth.service';
 import { WidgetService } from 'src/app/services/widget/widget.service';
+import { v4 as uuidv4 } from 'uuid';
+
+const id = uuidv4();
 
 declare const FB: any;
 
@@ -33,16 +36,14 @@ export class SignUpComponent implements OnInit {
 
     const initialSiteId = this.widgetService.getSiteId();
     if (initialSiteId) {
-      //this.siteId = initialSiteId;
+      this.siteId = initialSiteId;
     }
 
     this.widgetService.siteId$.subscribe(id => {
       if (id && id !== this.siteId) {
-        //this.siteId = id;
+        this.siteId = id;
       }
     });
-
-    this.siteId = "0cc78a8e-f60b-420c-b412-6b953d578a84";
 
   }
 

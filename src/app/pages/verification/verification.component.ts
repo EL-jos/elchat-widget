@@ -49,7 +49,7 @@ export class VerificationComponent implements OnInit, OnDestroy {
     });
 
     // Exemple : 1 minute par défaut si déjà envoyé
-    this.startResendTimer(1);
+    this.startResendTimer(5); // 5 minutes pour l'exemple, à ajuster selon le backend
   }
 
   ngOnDestroy(): void {
@@ -79,7 +79,7 @@ export class VerificationComponent implements OnInit, OnDestroy {
 
   onSubmit(form: NgForm): void {
   
-    const code =
+    const code : string =
       form.value.code0 +
       form.value.code1 +
       form.value.code2 +

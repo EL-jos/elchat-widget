@@ -9,6 +9,11 @@ import { WidgetService } from 'src/app/services/widget/widget.service';
 // Ajoute ces imports avec les autres
 import { VoiceService, VoiceState } from '../../services/voice/voice.service';
 import { Subscription } from 'rxjs';
+//import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4Lib } from 'uuid';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { VisitorService } from 'src/app/services/visitor/visitor.service';
+import { AuthService } from 'src/app/services/auth/auth.service';
 
 @Component({
   selector: 'app-chat',
@@ -49,7 +54,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     private mercure: MercureService,
     private widgetService: WidgetService,
     private lastConvService: LastConversationService,
-    public voiceService: VoiceService
+    public voiceService: VoiceService,
+    private snackBar: MatSnackBar,   // 🔹 Ajout
+    private visitorService: VisitorService, // 🔹 Ajout
+    private authService: AuthService // 🔹 Ajout pour vérifier si visiteur ou utilisateur connecté
   ) { }
 
   ngOnInit(): void {
@@ -59,13 +67,39 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     const initialSiteId = this.widgetService.getSiteId();
     if (initialSiteId) {
       this.siteId = initialSiteId;
-      this.loadMessage(this.conversationId, this.siteId);
+
+      // récupérer UUID du visiteur
+      let visitorUUID: string | undefined;
+      if (!this.authService.isAuthenticated) {
+        visitorUUID = this.widgetService.getVisitorUUID();
+        // init visitor côté backend
+        //this.visitorService.initVisitor(this.siteId, visitorUUID).subscribe();
+      }
+      // ensuite charger la conversation
+      const lastConvId = this.lastConvService.getLastConversationId(this.siteId);
+      if (lastConvId) {
+        this.loadMessage(lastConvId, this.siteId, visitorUUID);
+      }else if (this.conversationId) {
+        this.loadMessage(this.conversationId, this.siteId);
+      }
     }
 
     this.widgetService.siteId$.subscribe(id => {
       if (id && id !== this.siteId) {
         this.siteId = id;
-        if (this.siteId && this.conversationId) {
+
+        // récupérer UUID du visiteur
+        let visitorUUID: string | undefined;
+        if (!this.authService.isAuthenticated) {
+          visitorUUID = this.widgetService.getVisitorUUID();
+          // init visitor côté backend
+          //this.visitorService.initVisitor(this.siteId, visitorUUID).subscribe();
+        }
+        // ensuite charger la conversation
+        const lastConvId = this.lastConvService.getLastConversationId(this.siteId);
+        if (lastConvId) {
+          this.loadMessage(lastConvId, this.siteId, visitorUUID);
+        }else if (this.siteId && this.conversationId) {
           this.loadMessage(this.conversationId, this.siteId);
         }
       }
@@ -196,8 +230,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     this.visualizerCanvas = canvas ?? undefined;
   }
 
-  loadMessage(conversationId: string, siteId: string) {
-    this.chatService.getUserMessages(conversationId, siteId).subscribe({
+  loadMessage(conversationId: string, siteId: string, visitorUUID?: string): void {
+    this.chatService.getUserMessages(conversationId, siteId, visitorUUID).subscribe({
       next: (conversation) => {
 
         this.selectedConversation = conversation;
@@ -232,6 +266,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   sendMessage(content: string): void {
     if (!content.trim()) return;
 
+    const visitorUUID = !this.authService.isAuthenticated
+      ? this.widgetService.getVisitorUUID()
+      : undefined;
+
     const isNewConversation = !this.selectedConversation;
     const TEMP_ID = 'temp';
 
@@ -251,7 +289,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // ➕ ajouter le message de l'utilisateur
     this.selectedConversation?.messages.push({
-      id: crypto.randomUUID(),
+      id: this.uuidv4(),
       content,
       role: 'user',
       created_at: new Date().toISOString()
@@ -273,7 +311,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         ? null
         : this.selectedConversation?.id;
 
-    this.chatService.sendMessage(conversationId as any, content, this.siteId)
+    this.chatService.sendMessage(conversationId as any, content, this.siteId, visitorUUID)
       .subscribe({
         next: (res: any) => {
 
@@ -290,7 +328,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
               this.removeLoading();
               this.selectedConversation.messages.push({
-                id: crypto.randomUUID(),
+                id: this.uuidv4(),
                 content: res.answer,
                 role: 'bot',
                 created_at: new Date().toISOString()
@@ -310,7 +348,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     
     if (this.selectedConversation?.id && this.siteId) {
-      this.lastConvService.setLastConversationId(this.siteId, this.selectedConversation.id);
+      const visitorUUID = !this.authService.isAuthenticated
+        ? this.widgetService.getVisitorUUID()
+        : undefined;
+      this.lastConvService.setLastConversationId(this.siteId, this.selectedConversation.id, visitorUUID);
     }
   }
 
@@ -321,8 +362,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
   selectConversation(conv: Conversation) {
     this.selectedConversation = conv;
+    const visitorUUID = this.widgetService.getVisitorUUID();
     if (this.siteId && conv?.id) {
-      this.lastConvService.setLastConversationId(this.siteId, conv.id);
+      this.lastConvService.setLastConversationId(this.siteId, conv.id, visitorUUID);
     }
 
     if (this.mercureSub) {
@@ -353,7 +395,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         this.selectedConversation.messages.push({
-          id: crypto.randomUUID(),
+          id: this.uuidv4(),
           content: event.content,
           role: event.type === 'bot_message' ? 'bot' : 'user',
           created_at: event.created_at
@@ -402,6 +444,25 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     this.messageContent = '';
     this.isChatStarted = false;
 
+  }
+
+  private uuidv4(): string {
+    try {
+      // Tester si le navigateur supporte crypto.getRandomValues
+      if (typeof crypto === 'undefined' || !crypto.getRandomValues) {
+        throw new Error('Crypto non supporté');
+      }
+      return uuidv4Lib();
+    } catch (err) {
+      // Afficher SnackBar pour inciter à mettre à jour le navigateur
+      this.snackBar.open(
+        'Pour utiliser pleinement ELChat, merci de mettre à jour votre navigateur.',
+        'Fermer',
+        { duration: 5000 }
+      );
+      // Fallback : ID simple mais non sécurisé
+      return 'fallback-' + Math.random().toString(36).substring(2, 10);
+    }
   }
 
 }

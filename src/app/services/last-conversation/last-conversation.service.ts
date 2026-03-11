@@ -10,27 +10,29 @@ export class LastConversationService {
 
   constructor(private chatService: ChatService) { }
 
-  private getKey(siteId: string) {
-    return `last_conversation_${siteId}`;
+  private getKey(siteId: string, visitorUUID?: string) {
+    return visitorUUID
+      ? `last_conversation_${siteId}_${visitorUUID}`
+      : `last_conversation_${siteId}`;
   }
 
-  getLastConversationId(siteId: string): string | null {
-    return localStorage.getItem(this.getKey(siteId));
+  getLastConversationId(siteId: string, visitorUUID?: string): string | null {
+    return localStorage.getItem(this.getKey(siteId, visitorUUID));
   }
 
-  setLastConversationId(siteId: string, conversationId: string) {
-    localStorage.setItem(this.getKey(siteId), conversationId);
+  setLastConversationId(siteId: string, conversationId: string, visitorUUID?: string) {
+    localStorage.setItem(this.getKey(siteId, visitorUUID), conversationId);
   }
 
-  clearLastConversation(siteId: string) {
-    localStorage.removeItem(this.getKey(siteId));
+  clearLastConversation(siteId: string, visitorUUID?: string) {
+    localStorage.removeItem(this.getKey(siteId, visitorUUID));
   }
 
   /**
    * Retourne la conversation valide si possible (timezone-safe et fallback)
    */
-  resolveLastConversation(siteId: string): Observable<Conversation | null> {
-    const storedId = this.getLastConversationId(siteId);
+  resolveLastConversation(siteId: string, visitorUUID?: string): Observable<Conversation | null> {
+    const storedId = this.getLastConversationId(siteId, visitorUUID);
 
     const isToday = (dateStr: string) => {
       const today = new Date();
@@ -41,24 +43,24 @@ export class LastConversationService {
     };
 
     if (storedId) {
-      return this.chatService.getUserMessages(storedId, siteId).pipe(
+      return this.chatService.getUserMessages(storedId, siteId, visitorUUID).pipe(
         map(conv => {
           const lastMsg = conv.messages[conv.messages.length - 1];
           if (!lastMsg || !isToday(lastMsg.created_at)) {
-            this.clearLastConversation(siteId);
+            this.clearLastConversation(siteId, visitorUUID);
             return null;
           }
           return conv;
         }),
         catchError(() => {
-          this.clearLastConversation(siteId);
+          this.clearLastConversation(siteId, visitorUUID);
           return of(null);
         })
       );
     }
 
     // Fallback → récupérer la conversation la plus récente du jour
-    return this.chatService.getUserConversations(siteId).pipe(
+    return this.chatService.getUserConversations(siteId, visitorUUID).pipe(
       map(convs => {
         const recentConv = convs
           .sort((a, b) => {

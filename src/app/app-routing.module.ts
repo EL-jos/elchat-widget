@@ -10,7 +10,7 @@ import { WelcomComponent } from './pages/welcom/welcom.component';
 import { ConversationComponent } from './pages/conversation/conversation.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/sign-in', pathMatch: 'full' },
+  //{ path: '', redirectTo: '/sign-in', pathMatch: 'full' },
   { path: 'sign-in', component: SignInComponent },
   { path: 'sign-up', component: SignUpComponent },
   { path: 'verify', component: VerificationComponent },
@@ -19,7 +19,7 @@ const routes: Routes = [
   { path: 'conversations', component: ConversationComponent },
   { path: 'chat/:conversation_id', component: ChatComponent },
   { path: 'welcom', component: WelcomComponent },
-  { path: '**', redirectTo: '/sign-in' }
+  //{ path: '**', redirectTo: '/sign-in' }
 ];
 
 @NgModule({
