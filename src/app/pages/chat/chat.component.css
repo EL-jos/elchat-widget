@@ -70,3 +70,26 @@
     background: #fee2e2;
     color: #991b1b;
 }
+
+markdown p {
+    margin: 0 0 0.5rem 0;
+}
+
+markdown ul {
+    margin: 0.5rem 0;
+    padding-left: 1.2rem;
+
+
+}
+
+markdown ul li {
+    margin-bottom: 0.3rem;
+}
+
+markdown strong {
+    font-weight: 600;
+}
+
+markdown  em {
+    font-style: italic;
+}

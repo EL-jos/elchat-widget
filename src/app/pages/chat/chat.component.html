@@ -30,9 +30,10 @@
                 </ng-container>
                 <!-- 🔹 Contenu + Bouton TTS pour les messages bot (AJOUTER) -->
                 <ng-container *ngIf="msg.id!=='loading'">
-                    <p class="el-message-content">{{ msg.content }}</p>
-                    <markdown [data]="formatMessage(msg.content)"></markdown>
-                
+                    <p class="el-message-content">
+                        <markdown [data]="formatMessage(msg.content)"></markdown>
+                    </p>
+                    
                     <!-- Bouton TTS uniquement pour les messages du bot -->
                     <button *ngIf="msg.role === 'bot'" type="button" class="el-btn-tts" [class.playing]="speakingMessageIds.has(msg.id)"
                         (click)="playMessageTTS(msg.id, msg.content)" title="Écouter le message">
