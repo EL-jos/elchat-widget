@@ -66,6 +66,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const initialSiteId = this.widgetService.getSiteId();
     if (initialSiteId) {
+      //console.log("RECUPERATION DU SITE ID A PARTIR DE WIDGET SERVICE");
+      
       this.siteId = initialSiteId;
 
       // récupérer UUID du visiteur
@@ -75,8 +77,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         // init visitor côté backend
         //this.visitorService.initVisitor(this.siteId, visitorUUID).subscribe();
       }
+      
       // ensuite charger la conversation
-      const lastConvId = this.lastConvService.getLastConversationId(this.siteId);
+      const lastConvId = this.lastConvService.getLastConversationId(this.siteId, visitorUUID);
+      //console.log(`SiteID: ${this.siteId} \n**** isAuth: ${this.authService.isAuthenticated} \n**** visitoUUID: ${visitorUUID} \n**** lastConvId: ${lastConvId}`);
       if (lastConvId) {
         this.loadMessage(lastConvId, this.siteId, visitorUUID);
       }else if (this.conversationId) {
@@ -86,6 +90,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.widgetService.siteId$.subscribe(id => {
       if (id && id !== this.siteId) {
+         //console.log("RECUPERATION DU SITE ID A PARTIR DE WIDGET SERVICE AVEC SUJET");
         this.siteId = id;
 
         // récupérer UUID du visiteur
@@ -96,7 +101,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
           //this.visitorService.initVisitor(this.siteId, visitorUUID).subscribe();
         }
         // ensuite charger la conversation
-        const lastConvId = this.lastConvService.getLastConversationId(this.siteId);
+        const lastConvId = this.lastConvService.getLastConversationId(this.siteId, visitorUUID);
         if (lastConvId) {
           this.loadMessage(lastConvId, this.siteId, visitorUUID);
         }else if (this.siteId && this.conversationId) {
@@ -123,7 +128,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   private initVoice(): void {
     // Souscription aux changements d'état voice
     this.voiceSubscription = this.voiceService.state$.subscribe(state => {
-      console.log(state);
+      //console.log(state);
       
       this.voiceState = state;
 
@@ -142,7 +147,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Ajoute cette méthode dans la classe
   private handleVoiceTranscript(text: string): void {
-    console.log(text);
+    //console.log(text);
     
     if (!text?.trim()) return;
 

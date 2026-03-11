@@ -88,7 +88,7 @@ export class AppComponent implements OnInit, OnDestroy{
 
       })
     ).subscribe(conv => {
-      console.log("RESULTAT DE CONV: ", conv);
+      //console.log("RESULTAT DE CONV: ", conv);
       
       if (!conv) {
         if (this.authService.isAuthenticated) {

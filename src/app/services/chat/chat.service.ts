@@ -39,7 +39,7 @@ export class ChatService {
    * Récupère toutes les conversations de l'utilisateur connecté
    */
   getUserMessages(conversationId: string, siteId: string, visitorUUID?: string): Observable<Conversation> {
-    console.log("chargement message: ", visitorUUID);
+    //console.log("chargement message: ", visitorUUID);
     
     if (visitorUUID) {
       return this.http.get<Conversation>(`${this.api}/widget/chat/${conversationId}/${siteId}?visitor_uuid=${visitorUUID}`);

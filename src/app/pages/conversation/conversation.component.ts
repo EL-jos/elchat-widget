@@ -221,6 +221,7 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
     this.chatService.sendMessage(null as any, content, this.siteId, visitorUUID)
       .subscribe({
         next: (res: any) => {
+          this.lastConvService.setLastConversationId(this.siteId, res.conversation_id, visitorUUID);
           // 🔁 redirection vers ChatComponent
           this.router.navigate(['/chat', res.conversation_id]);
         },
@@ -232,21 +233,21 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   startNewChat(): void {
-    console.log("bonjour");
+    //console.log("bonjour");
     
     // stop mercure sur l'ancienne conversation
     if (this.mercureSub) {
-      console.log("mercure unsub");
+      //console.log("mercure unsub");
       this.mercureSub.unsubscribe();
       this.mercureSub = undefined;
     }
 
     if (this.selectedConversation?.id) {
-      console.log("dans last conv service");
+      //console.log("dans last conv service");
       this.lastConvService.clearLastConversation(this.siteId);
     }
 
-    console.log("après last conv service");
+    //console.log("après last conv service");
     // ✅ Ajouter ce cleanup voice
     this.stopVoiceInput();
     
