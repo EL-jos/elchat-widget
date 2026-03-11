@@ -67,45 +67,66 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     const initialSiteId = this.widgetService.getSiteId();
     if (initialSiteId) {
       //console.log("RECUPERATION DU SITE ID A PARTIR DE WIDGET SERVICE");
-      
+
       this.siteId = initialSiteId;
 
       // récupérer UUID du visiteur
       let visitorUUID: string | undefined;
       if (!this.authService.isAuthenticated) {
         visitorUUID = this.widgetService.getVisitorUUID();
-        // init visitor côté backend
-        //this.visitorService.initVisitor(this.siteId, visitorUUID).subscribe();
       }
-      
-      // ensuite charger la conversation
-      const lastConvId = this.lastConvService.getLastConversationId(this.siteId, visitorUUID);
-      //console.log(`SiteID: ${this.siteId} \n**** isAuth: ${this.authService.isAuthenticated} \n**** visitoUUID: ${visitorUUID} \n**** lastConvId: ${lastConvId}`);
-      if (lastConvId) {
-        this.loadMessage(lastConvId, this.siteId, visitorUUID);
-      }else if (this.conversationId) {
-        this.loadMessage(this.conversationId, this.siteId);
+
+      if (this.authService.isAuthenticated) {
+
+        // utilisateur connecté → conversation depuis URL
+        if (this.conversationId) {
+          this.loadMessage(this.conversationId, this.siteId);
+        }
+
+      } else {
+
+        // visiteur anonyme → conversation depuis localStorage
+        const lastConvId = this.lastConvService.getLastConversationId(
+          this.siteId,
+          visitorUUID
+        );
+
+        if (lastConvId) {
+          this.loadMessage(lastConvId, this.siteId, visitorUUID);
+        }
+
       }
     }
 
     this.widgetService.siteId$.subscribe(id => {
       if (id && id !== this.siteId) {
-         //console.log("RECUPERATION DU SITE ID A PARTIR DE WIDGET SERVICE AVEC SUJET");
+        //console.log("RECUPERATION DU SITE ID A PARTIR DE WIDGET SERVICE AVEC SUJET");
         this.siteId = id;
 
         // récupérer UUID du visiteur
         let visitorUUID: string | undefined;
         if (!this.authService.isAuthenticated) {
           visitorUUID = this.widgetService.getVisitorUUID();
-          // init visitor côté backend
-          //this.visitorService.initVisitor(this.siteId, visitorUUID).subscribe();
         }
-        // ensuite charger la conversation
-        const lastConvId = this.lastConvService.getLastConversationId(this.siteId, visitorUUID);
-        if (lastConvId) {
-          this.loadMessage(lastConvId, this.siteId, visitorUUID);
-        }else if (this.siteId && this.conversationId) {
-          this.loadMessage(this.conversationId, this.siteId);
+
+        if (this.authService.isAuthenticated) {
+
+          if (this.conversationId) {
+            this.loadMessage(this.conversationId, this.siteId);
+          }
+
+        }
+        else {
+
+          const lastConvId = this.lastConvService.getLastConversationId(
+            this.siteId,
+            visitorUUID
+          );
+
+          if (lastConvId) {
+            this.loadMessage(lastConvId, this.siteId, visitorUUID);
+          }
+
         }
       }
     });
@@ -129,7 +150,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     // Souscription aux changements d'état voice
     this.voiceSubscription = this.voiceService.state$.subscribe(state => {
       //console.log(state);
-      
+
       this.voiceState = state;
 
       // Gérer les erreurs
@@ -148,13 +169,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   // Ajoute cette méthode dans la classe
   private handleVoiceTranscript(text: string): void {
     //console.log(text);
-    
+
     if (!text?.trim()) return;
 
     //✅ Option 3 : Ajouter un saut de ligne si texte existant
-    this.messageContent = this.messageContent 
-       ? `${this.messageContent}\n${text}`
-       : text;
+    this.messageContent = this.messageContent
+      ? `${this.messageContent}\n${text}`
+      : text;
 
     // Reset du transcript pour éviter les doublons
     this.voiceService.resetTranscript();
@@ -351,7 +372,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
           this.removeLoading();
         }
       });
-    
+
     if (this.selectedConversation?.id && this.siteId) {
       const visitorUUID = !this.authService.isAuthenticated
         ? this.widgetService.getVisitorUUID()
@@ -468,6 +489,15 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       // Fallback : ID simple mais non sécurisé
       return 'fallback-' + Math.random().toString(36).substring(2, 10);
     }
+  }
+
+  formatMessage(content: string): string {
+    if (!content) return '';
+
+    // Ajoute un saut de ligne avant les listes si manquant
+    content = content.replace(/\* /g, '\n* ');
+
+    return content;
   }
 
 }

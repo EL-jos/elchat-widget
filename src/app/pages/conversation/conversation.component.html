@@ -10,7 +10,7 @@
     <div class="el-chat-conversations">
         <div *ngFor="let conv of conversations" class="el-conversation-item"
             [class.active]="conv.id === selectedConversation?.id">
-            <a [routerLink]="'/chat/' + conv.id">
+            <a (click)="onSelectedConversation(conv)">
                 <div class="el-conversation-title">
                     {{ conv.messages[0]?.content | truncate: 50 }}
                 </div>

@@ -196,6 +196,11 @@ export class ConversationComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  onSelectedConversation(conv: Conversation){
+    this.selectConversation(conv);
+    this.router.navigate(['/chat', conv.id]);
+  }
+
   ngOnDestroy(): void {
     // 🔹 Cleanup
     if (this.mercureSub) this.mercureSub.unsubscribe();

@@ -18,6 +18,7 @@ import { TruncatePipe } from './pipes/truncate/truncate.pipe';
 import { SpinnerComponent } from './components/spinner/spinner.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MarkdownModule } from 'ngx-markdown';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     HttpClientModule,
     BrowserAnimationsModule,
     MatSnackBarModule,
+    MarkdownModule.forRoot()
   ],
   providers: [
     {
