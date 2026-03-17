@@ -298,7 +298,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       id: this.uuidv4(),
       content,
       role: 'user',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      ctas: []
     });
 
     // ➕ ajouter le loading IA
@@ -306,7 +307,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       id: 'loading',
       content: 'Analysing your request...',
       role: 'bot',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      ctas: []
     });
 
     this.scrollToBottom();
@@ -337,7 +339,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
                 id: this.uuidv4(),
                 content: res.answer,
                 role: 'bot',
-                created_at: new Date().toISOString()
+                created_at: new Date().toISOString(),
+                ctas: res.ctas
               });
 
               this.scrollToBottom();
@@ -404,7 +407,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
           id: this.uuidv4(),
           content: event.content,
           role: event.type === 'bot_message' ? 'bot' : 'user',
-          created_at: event.created_at
+          created_at: event.created_at,
+          ctas: event.ctas ? event.ctas : []
         });
 
         this.scrollToBottom();
