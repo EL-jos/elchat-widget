@@ -102,7 +102,7 @@ export class AppComponent implements OnInit, OnDestroy{
     });
 
 
-    this.widgetService.siteIdSubject.next("0cc78a8e-f60b-420c-b412-6b953d578a84"); // déclencher la logique de connexion dès que le siteId est disponible (postMessage ou URL)
+    this.widgetService.siteIdSubject.next("1e0d17be-c7ef-4713-9082-3e6b2845afc6"); // déclencher la logique de connexion dès que le siteId est disponible (postMessage ou URL)
   }
 
   ngOnDestroy(): void {

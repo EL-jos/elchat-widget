@@ -15,6 +15,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { VisitorService } from 'src/app/services/visitor/visitor.service';
 import { AuthService } from 'src/app/services/auth/auth.service';
 import { WidgetSetting } from 'src/app/models/widget-settings/widget-settings';
+import { Cta } from 'src/app/models/cta/cta';
+import { Message } from 'src/app/models/message/message';
+import { Entity } from 'src/app/models/entity/entity';
 
 @Component({
   selector: 'app-chat',
@@ -240,6 +243,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     this.chatService.getUserMessages(conversationId, siteId, visitorUUID).subscribe({
       next: (conversation) => {
 
+        //console.log(conversation);
+
+
         this.selectedConversation = conversation;
 
         if (conversation.messages.length > 0) {
@@ -299,7 +305,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       content,
       role: 'user',
       created_at: new Date().toISOString(),
-      ctas: []
+      displayed_ctas: [],
+      entities: []
     });
 
     // ➕ ajouter le loading IA
@@ -308,7 +315,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       content: 'Analysing your request...',
       role: 'bot',
       created_at: new Date().toISOString(),
-      ctas: []
+      displayed_ctas: [],
+      entities: []
     });
 
     this.scrollToBottom();
@@ -323,6 +331,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe({
         next: (res: any) => {
 
+          //console.log(res);
+
+
           // 🔹 nouvelle conversation → assigner ID réel
           if (this.selectedConversation?.id === TEMP_ID) {
             this.selectedConversation.id = res.conversation_id;
@@ -335,13 +346,20 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
               this.firstBotMessageHandled = true;
 
               this.removeLoading();
-              this.selectedConversation.messages.push({
+
+              let dataMessage = {
                 id: this.uuidv4(),
                 content: res.answer,
                 role: 'bot',
                 created_at: new Date().toISOString(),
-                ctas: res.ctas
-              });
+                displayed_ctas: res.ctas,
+                entities: res.entities
+              };
+
+              this.selectedConversation.messages.push(Message.fromJson(dataMessage));
+
+              //console.log(this.selectedConversation.messages);
+
 
               this.scrollToBottom();
             }
@@ -385,6 +403,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     this.mercureSub = this.mercure.subscribe<any>(topic).subscribe({
       next: (event) => {
 
+        //console.log(event);
+
+
         if (!this.selectedConversation) return;
         if (event.conversation_id !== this.selectedConversation.id) return;
 
@@ -403,13 +424,19 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
           this.removeLoading();
         }
 
-        this.selectedConversation.messages.push({
+        let dataMessage = {
           id: this.uuidv4(),
           content: event.content,
           role: event.type === 'bot_message' ? 'bot' : 'user',
           created_at: event.created_at,
-          ctas: event.ctas ? event.ctas : []
-        });
+          displayed_ctas: event.ctas ? event.ctas : [],
+          entities: event.entities ? event.entities : []
+        };
+
+        this.selectedConversation.messages.push(Message.fromJson(dataMessage));
+
+        //console.log(this.selectedConversation.messages);
+
 
         this.scrollToBottom();
       },
@@ -482,6 +509,93 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     content = content.replace(/\* /g, '\n* ');
 
     return content;
+  }
+
+  handleCta(cta: Cta) {
+
+    if (cta.clicked) return;
+
+    cta.clicked = true;
+
+    switch (cta.action) {
+
+      case 'open_url':
+        window.open(cta.value, '_blank');
+        break;
+
+      case 'navigate':
+        window.location.href = cta.value || '';
+        break;
+
+      case 'send_message':
+        if (cta.value) {
+          this.sendMessage(cta.value);
+        }
+        break;
+
+      case 'email':
+        window.location.href = `mailto:${cta.value}`;
+        break;
+
+      case 'phone':
+        window.location.href = `tel:${cta.value}`;
+        break;
+
+      case 'whatsapp':
+        window.open(`https://wa.me/${cta.value}`, '_blank');
+        break;
+
+      case 'open_form':
+        console.log('open form', cta.value);
+        break;
+
+      case 'trigger_event':
+        window.dispatchEvent(
+          new CustomEvent(cta.value || 'cta-event')
+        );
+        break;
+    }
+  }
+
+  openEntity(entity: Entity): void {
+    if (!entity) return;
+
+    switch (entity.type) {
+      case 'product':
+        // Ouvre le produit dans un nouvel onglet
+        if (entity.url) {
+          window.open(entity.url, '_blank');
+        } else {
+          this.snackBar.open('Lien produit indisponible', 'Fermer', { duration: 3000 });
+        }
+        break;
+
+      case 'page':
+        // Ouvre la page correspondante
+        if (entity.url) {
+          window.open(entity.url, '_blank');
+        } else {
+          this.snackBar.open('Lien page indisponible', 'Fermer', { duration: 3000 });
+        }
+        break;
+
+      case 'document':
+        if (entity.url) {
+          // ouvre le document dans un nouvel onglet
+          window.open(entity.url, '_blank');
+        } else if (entity.id) {
+          // fallback : créer une URL interne vers /document/:id
+          window.open(`/document/${entity.url}`, '_blank');
+        } else {
+          this.snackBar.open('Document indisponible', 'Fermer', { duration: 3000 });
+        }
+        break;
+
+      default:
+        console.warn('Entity non gérée :', entity);
+        this.snackBar.open('Type d’entité non supporté', 'Fermer', { duration: 3000 });
+        break;
+    }
   }
 
 }

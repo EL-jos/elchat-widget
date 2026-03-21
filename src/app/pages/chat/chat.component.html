@@ -40,6 +40,53 @@
                         <span *ngIf="!speakingMessageIds.has(msg.id)">🔊</span>
                         <span *ngIf="speakingMessageIds.has(msg.id)">⏹️</span>
                     </button>
+
+
+                    <!-- 🔥 ENTITIES DANS LA BULLE -->
+                    <div *ngIf="msg.entities?.length" class="el-message-entities">
+                    
+                        <ng-container *ngFor="let entity of msg.entities | slice:0:4; let i = index">
+                    
+                            <!-- PRODUIT -->
+                            <div *ngIf="entity.type === 'product'" class="el-entity-product" [ngClass]="{
+                                           'el-entity-product-large': i === 0,
+                                           'el-entity-product-small': i > 0
+                                         }" (click)="openEntity(entity)">
+                    
+                                <img [src]="entity.image || 'assets/placeholder.png'" />
+                    
+                                <div class="el-entity-content">
+                                    <h4>{{ entity.title }}</h4>
+                    
+                                    <p *ngIf="entity.price" class="el-price">
+                                        {{ entity.price }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- DOCUMENT -->
+                            <div *ngIf="entity.type === 'document'" class="el-entity-document" (click)="openEntity(entity)">
+                                📄 {{ entity.title || 'Document' }}
+                            </div>
+                    
+                            <!-- PAGE -->
+                            <div *ngIf="entity.type === 'page'" class="el-entity-page" (click)="openEntity(entity)">
+                                🔗 {{ entity.title }}
+                            </div>
+
+                    
+                        </ng-container>
+                    
+                    </div>
+
+                    <!-- CTA -->
+                    <div *ngIf="msg.displayed_ctas?.length" class="el-message-ctas">
+                        <button *ngFor="let cta of msg.displayed_ctas" class="el-cta-btn" [ngClass]="'el-cta-' + (cta.style || 'primary')"
+                            (click)="handleCta(cta)">
+                            {{ cta.label }}
+                        </button>
+                    </div>
+                    
                 </ng-container>
             </div>
         </ng-container>

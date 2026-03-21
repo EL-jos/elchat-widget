@@ -93,3 +93,135 @@ markdown strong {
 markdown  em {
     font-style: italic;
 }
+
+.el-message-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.el-cta-btn {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.el-cta-primary {
+    background: #2563eb;
+    color: white;
+}
+
+.el-cta-secondary {
+    background: #e5e7eb;
+    color: #111;
+}
+
+.el-cta-success {
+    background: #16a34a;
+    color: white;
+}
+
+.el-cta-btn:hover {
+    opacity: 0.9;
+}
+
+
+/* ENTITIES */
+.el-message-entities {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* PRODUIT */
+.el-entity-product {
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.el-entity-product:hover {
+    transform: scale(1.02);
+}
+
+/* GROS */
+.el-entity-product-large {
+    width: 100%;
+}
+
+.el-entity-product-large img {
+    height: 140px;
+}
+
+/* PETITS */
+.el-entity-product-small {
+    width: calc(50% - 3px);
+}
+
+.el-entity-product-small img {
+    height: 90px;
+}
+
+/* IMAGE */
+.el-entity-product img {
+    width: 100%;
+    object-fit: cover;
+}
+
+/* CONTENT */
+.el-entity-content {
+    padding: 6px;
+}
+
+.el-entity-content h4 {
+    font-size: 12px;
+    margin: 0;
+}
+
+.el-price {
+    font-size: 11px;
+    color: #0a7cff;
+    font-weight: bold;
+}
+
+/* PAGE */
+.el-entity-page {
+    width: 100%;
+    font-size: 12px;
+    background: #f1f3f5;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.el-entity-product:hover,
+.el-entity-page:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* DOCUMENT */
+.el-entity-document {
+    width: 100%;
+    font-size: 12px;
+    background: #e6f7ff;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.el-entity-document:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
